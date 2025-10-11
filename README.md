@@ -1,323 +1,237 @@
-# REE MCP Server
+# ⚡ REE MCP Server
 
-A production-ready MCP (Model Context Protocol) server for accessing Red Eléctrica Española (REE) electricity data through the eSios API. Built with Domain-Driven Design principles, comprehensive testing, and modern Python best practices.
+> Access Spanish electricity data (demand, generation, prices, emissions) through Claude using the REE eSios API
 
-## Features
+A production-ready **MCP (Model Context Protocol)** server that brings real-time Spanish electricity data to Claude Code. Query demand, generation mix, prices, and emissions data with simple natural language - all powered by Red Eléctrica Española's official API.
 
-- **Complete REE API Coverage**: Access to 1,967+ electricity indicators including:
-  - Real-time and forecasted demand
-  - Generation by source (nuclear, wind, solar, hydro, etc.)
-  - Market prices (SPOT, PVPC)
-  - International exchanges
-  - CO₂ emissions
+Built with **Domain-Driven Design**, **Clean Architecture**, and **comprehensive testing** by [Javi Santos](https://www.linkedin.com/in/francisco-javier-santos-criado/) - AI & Robotics Specialist with published research in computer vision and LLM interpretability.
 
-- **Clean Architecture**: Implements DDD with clear separation of concerns:
-  - Domain Layer: Pure business logic
-  - Application Layer: Use cases and DTOs
-  - Infrastructure Layer: External dependencies (API clients, repositories)
-  - Interface Layer: MCP server tools and resources
+---
 
-- **Production Ready**:
-  - Comprehensive test coverage (unit, integration, e2e)
-  - Type safety with mypy strict mode
-  - Automatic retry with exponential backoff
-  - Error handling and validation
-  - Configuration management with pydantic-settings
+## 🎯 Why This Exists
 
-## Architecture
+### The Story Behind REE
 
-```
-src/ree_mcp/
-├── domain/              # Pure business logic
-│   ├── entities/        # Indicator, IndicatorValue, IndicatorData
-│   ├── value_objects/   # IndicatorId, DateTimeRange, etc.
-│   ├── repositories/    # Repository interfaces
-│   └── exceptions.py    # Domain exceptions
-├── application/         # Use cases
-│   ├── dtos/           # Request/Response DTOs
-│   └── use_cases/      # GetIndicatorData, ListIndicators, etc.
-├── infrastructure/      # External dependencies
-│   ├── http/           # REE API client with retry logic
-│   ├── repositories/   # Repository implementations
-│   └── config/         # Settings management
-└── interface/          # MCP server
-    └── mcp_server.py   # FastMCP tools and resources
-```
+**Red Eléctrica de España (REE)** is Spain's electricity transmission system operator - essentially the "nervous system" of Spain's power grid. They manage the delicate balance of electricity generation and consumption across the entire country, 24/7.
 
-## Installation
+Every 5 minutes, REE publishes **1,967+ indicators** covering:
+- How much electricity Spain is consuming right now
+- Where it's coming from (nuclear, wind, solar, hydro...)
+- How much it costs (SPOT market, PVPC rates)
+- Environmental impact (CO₂ emissions in real-time)
+- International electricity exchanges
 
-### Prerequisites
+This data is **public** but historically trapped behind API endpoints that require technical knowledge to access.
 
-- Python 3.11+
-- [uv](https://github.com/astral-sh/uv) (fast Python package installer)
-- REE API token (already configured in `.env`)
+### Why I Built This
 
-### Setup with uv (Recommended)
+*By [Javi Santos](https://www.linkedin.com/in/francisco-javier-santos-criado/)*
 
-1. Install uv if you haven't already:
+I wanted to **democratize access** to critical infrastructure data. Instead of writing Python scripts, I wanted conversations like this:
+
+**You:** *"Check what happened on April 28, 2025"*
+
+**Claude:** *Analyzes grid data...*
+
+🚨 **CRITICAL EVENT DETECTED - April 28, 2025 at 12:35h**
+
+**Massive Grid Collapse:**
+- **11,000 MW lost in 5 minutes** (43% capacity drop)
+- System fell from 25,184 MW → 14,185 MW instantly
+- Compatible with cascading blackout scenario
+- Recovery took 10+ hours
+
+**Analysis:**
+- 11:00-12:30: System stable, no warnings
+- 12:30-12:35: Catastrophic instantaneous failure
+- 12:35-13:35: Continued degradation to 9,635 MW minimum
+- Likely cause: Nuclear plant trip → frequency collapse → cascade
+
+*This would be one of Spain's worst blackouts in modern history.*
+
+---
+
+**That's the power of this MCP server.** You can investigate grid events, analyze renewable vs fossil generation trends, correlate prices with demand, or track Spain's decarbonization progress - all through natural conversation with Claude.
+
+No API documentation. No Python scripts. Just ask.
+
+---
+
+## 🚀 Quick Start
+
+Get up and running in 3 minutes:
+
+### 1️⃣ Clone & Install
+
 ```bash
+# Clone the repository
+git clone https://github.com/ESJavadex/ree-mcp.git
+cd ree-mcp
+
+# Install uv (fast Python package manager)
 curl -LsSf https://astral.sh/uv/install.sh | sh
 # Or on macOS: brew install uv
-```
 
-2. Navigate to the project directory:
-```bash
-cd /Users/javier.santos/javi-proyectos/ree-mcp
-```
-
-3. Create virtual environment and install dependencies with uv:
-```bash
+# Create virtual environment and install dependencies
 uv venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 uv pip install -e ".[dev]"
 ```
 
-4. Verify installation:
+### 2️⃣ Configure API Token
+
 ```bash
-pytest tests/unit/
+# Copy the example environment file
+cp .env.example .env
+
+# Edit .env and add your token (demo token included for testing)
+# REE_API_TOKEN=your_token_here
 ```
 
-### Alternative Setup (Standard pip)
+**Getting an API Token:**
+- **Testing/Demo**: The repository includes a demo token in `.env.example`
+- **Production**: Email consultasios@ree.es to request your own REE API token
 
-If you prefer traditional pip:
-
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -e ".[dev]"
-```
-
-## Claude Code Setup
-
-### Prerequisites
-
-Before configuring Claude Code, ensure you have:
-1. **API Token**: Create a `.env` file in the project root with your REE API token:
-   ```bash
-   # Copy the example file
-   cp .env.example .env
-
-   # Edit .env and add your token
-   # REE_API_TOKEN=your_actual_token_here
-   ```
-
-2. **Installation**: Complete the installation steps above (uv or pip)
-
-### Quick Setup (Recommended)
-
-The easiest way to add the server is using the provided installation script:
+### 3️⃣ Add to Claude Code
 
 ```bash
-# The script automatically reads the API token from .env
+# Run the installation script (reads token from .env automatically)
 ./INSTALL_COMMAND.sh
+
+# Verify installation
+claude mcp list
 ```
 
-This script will:
-- Load the API token from your `.env` file
-- Add the MCP server to Claude Code using `claude mcp add-json`
-- Configure all necessary environment variables
+You should see `ree-mcp: ✓ Connected` in the output.
 
-**Important**: Make sure your `.env` file exists with a valid `REE_API_TOKEN` before running the script.
+### 4️⃣ Start Using in Claude!
 
-### Manual Configuration
+Open Claude Code and try:
+- *"Show me the current electricity demand in Spain"*
+- *"What's the generation mix right now?"*
+- *"Compare solar vs wind generation today"*
+- *"Search for price indicators"*
 
-If you prefer manual setup, we provide two configuration templates in the repository:
+---
 
-#### Option 1: Local Installation (`.claude_mcp_config.json`)
+## 🎯 What Can You Do?
 
-For local development using your virtual environment:
+### 📊 Real-Time Data Access
 
-1. Copy your API token from the `.env` file
-2. Edit `.claude_mcp_config.json` and replace `YOUR_REE_API_TOKEN_HERE` with your actual token
-3. Update the `command` path if your installation directory is different
-4. Use `/config-mcp` in Claude Code to load the configuration
+Query **1,967+ electricity indicators** including:
 
-#### Option 2: Direct from GitHub with uvx (`.claude_mcp_config_uvx.json`)
+| Category | Examples |
+|----------|----------|
+| 💡 **Demand** | Real-time demand, forecasts, peaks |
+| 🏭 **Generation** | Nuclear, wind, solar, hydro, coal, gas |
+| 💰 **Prices** | SPOT market, PVPC rates |
+| 🌍 **Emissions** | CO₂ emissions in real-time |
+| 🔌 **Exchanges** | International imports/exports |
 
-For running directly from GitHub without local installation:
+### 🛠️ Available Tools
 
-1. Edit `.claude_mcp_config_uvx.json` and replace `YOUR_REE_API_TOKEN_HERE` with your token from `.env`
-2. Replace `YOUR_USERNAME` with your GitHub username (once published)
-3. Use `/config-mcp` in Claude Code to load the configuration
+The server exposes 5 MCP tools that Claude can use:
 
-**Security Note**: Never commit configuration files with actual API tokens to version control. The template files in this repository use placeholders that you should replace with your actual token from the `.env` file.
+1. **`get_indicator_data`** - Get time-series data for any indicator
+2. **`list_indicators`** - Browse all 1,967+ available indicators
+3. **`search_indicators`** - Find indicators by keyword (e.g., "solar", "precio")
+4. **`get_demand_summary`** - Quick demand overview for a date
+5. **`get_generation_mix`** - Generation breakdown by source
 
-### Environment Variables
+### 💬 Example Queries
 
-Configure the server behavior with these environment variables in the `env` section:
+Ask Claude naturally:
 
-| Variable | Description | Default | Required |
-|----------|-------------|---------|----------|
-| `REE_API_TOKEN` | REE API authentication token | - | ✅ Yes |
-| `REE_API_BASE_URL` | Base URL for REE API | `https://api.esios.ree.es` | No |
-| `REQUEST_TIMEOUT` | HTTP request timeout (seconds) | `30` | No |
-| `MAX_RETRIES` | Maximum retry attempts | `3` | No |
-| `RETRY_BACKOFF_FACTOR` | Exponential backoff factor | `0.5` | No |
+```
+"What was the electricity demand yesterday at noon?"
+"Show me all solar generation indicators"
+"Get the SPOT price for the last 24 hours"
+"Compare nuclear vs renewable generation this week"
+```
 
-### Getting Your API Token
+Claude will automatically choose the right tools and fetch the data!
 
-1. **For Development/Testing**: A demo token is included in the repository's `.env` file
-2. **For Production**: Contact REE (consultasios@ree.es) to request your own API token for eSios API
-3. **Setup**: Store your token in the `.env` file (never commit this file to version control)
+---
+
+## 📖 Common Indicator IDs
+
+Quick reference for frequently used indicators:
+
+### ⚡ Demand
+- `1293` - Real Demand (Peninsular) - *MW, 5-minute updates*
+- `2037` - Real National Demand - *MW, 5-minute updates*
+- `1292` - Demand Forecast - *MW, hourly*
+
+### 🔋 Generation Sources
+- `549` - Nuclear - *MW, 5-minute*
+- `2038` - Wind (National) - *MW, 5-minute*
+- `1295` - Solar PV (Peninsular) - *MW, 5-minute*
+- `2041` - Combined Cycle (National) - *MW, 5-minute*
+- `2042` - Hydroelectric (National) - *MW, 5-minute*
+
+### 💵 Prices
+- `600` - SPOT Market Price - *€/MWh, 15-minute*
+- `1013` - PVPC Rate - *€/MWh, hourly*
+
+### 🌱 Emissions
+- `10355` - CO₂ Emissions - *tCO₂eq, 5-minute*
+
+---
+
+## 🏗️ Architecture
+
+Built following **industry best practices**:
+
+```
+📦 ree-mcp
+├── 🎯 domain/           # Pure business logic (NO external dependencies)
+│   ├── entities/        # Indicator, IndicatorData, IndicatorValue
+│   ├── value_objects/   # IndicatorId, DateTimeRange, TimeGranularity
+│   ├── repositories/    # Abstract interfaces
+│   └── exceptions.py    # Domain-specific errors
+├── 🚀 application/      # Use cases & DTOs
+│   ├── use_cases/       # GetIndicatorData, ListIndicators, SearchIndicators
+│   └── dtos/           # Request/Response objects
+├── 🔧 infrastructure/   # External dependencies
+│   ├── http/           # REE API client with retry logic
+│   ├── repositories/   # Repository implementations
+│   └── config/         # Settings management
+└── 🌐 interface/       # MCP server
+    └── mcp_server.py   # FastMCP tools & resources
+```
+
+**Key Principles:**
+- ✅ **Domain-Driven Design (DDD)** - Clear separation of concerns
+- ✅ **Clean Architecture** - Dependencies point inward
+- ✅ **SOLID Principles** - All 5 implemented
+- ✅ **Type Safety** - 100% type-annotated with mypy strict mode
+- ✅ **NO Mocking** - Domain tests use pure functions
+- ✅ **Comprehensive Testing** - 59 tests (unit, integration, e2e)
+
+---
+
+## 🧪 Testing & Development
+
+### Run Tests
 
 ```bash
-# .env file (already in .gitignore)
-REE_API_TOKEN=your_actual_token_here
-```
-
-Use the provided `.env.example` as a template.
-
-## Usage
-
-### Running the MCP Server Standalone
-
-#### STDIO Mode (Default)
-```bash
-python -m ree_mcp
-```
-
-#### HTTP Mode (for testing)
-```bash
-python -c "from ree_mcp.interface.mcp_server import mcp; mcp.run(transport='http', port=8000)"
-```
-
-### Available Tools
-
-#### 1. `get_indicator_data`
-Get time-series data for any REE indicator.
-
-```python
-# Get hourly real demand for Oct 8, 2025
-await get_indicator_data(
-    indicator_id=1293,
-    start_date="2025-10-08T00:00",
-    end_date="2025-10-08T23:59",
-    time_granularity="hour"
-)
-
-# Get 5-minute wind generation
-await get_indicator_data(
-    indicator_id=2038,
-    start_date="2025-10-08T00:00",
-    end_date="2025-10-08T03:00",
-    time_granularity="raw"
-)
-```
-
-**Parameters:**
-- `indicator_id` (int): Indicator ID from REE API
-- `start_date` (str): Start datetime (ISO format: YYYY-MM-DDTHH:MM)
-- `end_date` (str): End datetime (ISO format)
-- `time_granularity` (str): `raw`, `hour`, `day`, or `fifteen_minutes` (default: `raw`)
-
-#### 2. `list_indicators`
-List all available indicators with pagination.
-
-```python
-# Get first 50 indicators
-await list_indicators(limit=50, offset=0)
-
-# Get all indicators
-await list_indicators()
-```
-
-#### 3. `search_indicators`
-Search indicators by keyword.
-
-```python
-# Find demand indicators
-await search_indicators("demanda", limit=10)
-
-# Find price indicators
-await search_indicators("precio")
-
-# Find solar generation
-await search_indicators("solar")
-```
-
-#### 4. `get_demand_summary`
-Get demand summary for a specific date (convenience tool).
-
-```python
-await get_demand_summary("2025-10-08")
-```
-
-#### 5. `get_generation_mix`
-Get electricity generation breakdown by source at a specific time.
-
-```python
-# Get generation mix at noon
-await get_generation_mix(date="2025-10-08", hour="12")
-
-# Get overnight generation
-await get_generation_mix(date="2025-10-08", hour="02")
-```
-
-### Available Resources
-
-#### `ree://indicators`
-Get complete list of all indicators.
-
-#### `ree://indicators/{indicator_id}`
-Get metadata for a specific indicator.
-
-## Common Indicator IDs
-
-| ID | Name | Unit | Frequency |
-|----|------|------|-----------|
-| **Demand** |||
-| 1293 | Real Demand | MW | 5 min |
-| 2037 | Real National Demand | MW | 5 min |
-| 1292 | Demand Forecast | MW | Hour |
-| **Generation - Synchronous** |||
-| 549 | Nuclear | MW | 5 min |
-| 2041 | Combined Cycle (National) | MW | 5 min |
-| 2042 | Hydroelectric (National) | MW | 5 min |
-| 547 | Coal | MW | 5 min |
-| **Generation - Renewables** |||
-| 2038 | Wind (National) | MW | 5 min |
-| 1295 | Solar PV (Peninsular) | MW | 5 min |
-| 2044 | Solar PV (National) | MW | 5 min |
-| 1294 | Solar Thermal (Peninsular) | MW | 5 min |
-| **Prices** |||
-| 600 | SPOT Market Price | €/MWh | 15 min |
-| 1013 | PVPC Rate | €/MWh | Hour |
-| **Emissions** |||
-| 10355 | CO₂ Emissions | tCO₂eq | 5 min |
-| **Exchanges** |||
-| 2072 | Total Exports | MW | 5 min |
-| 2077 | Total Imports | MW | 5 min |
-
-See `ree_docs.md` for complete indicator reference.
-
-## Development
-
-### Running Tests
-
-```bash
-# Run all tests
+# All tests
 pytest
 
-# Run unit tests only
+# Unit tests only (fast, no external dependencies)
 pytest tests/unit/
 
-# Run with coverage
+# With coverage report
 pytest --cov=src/ree_mcp --cov-report=html
-
-# Run integration tests (requires API)
-pytest -m integration
 ```
 
-### Type Checking
+### Code Quality
 
 ```bash
+# Type checking (mypy strict mode)
 mypy src/ree_mcp/
-```
 
-### Linting and Formatting
-
-```bash
-# Check code style
+# Linting
 ruff check .
 
 # Auto-fix issues
@@ -327,105 +241,167 @@ ruff check --fix .
 ruff format .
 ```
 
-### Project Structure
+### Run Server Standalone
 
-The project follows Clean Architecture and DDD principles:
+```bash
+# STDIO mode (for MCP)
+python -m ree_mcp
 
-- **Domain Layer**: Contains business entities, value objects, and interfaces. No external dependencies.
-- **Application Layer**: Implements use cases that orchestrate domain objects.
-- **Infrastructure Layer**: Implements repository interfaces and handles external API calls.
-- **Interface Layer**: Exposes MCP tools and resources using FastMCP.
+# HTTP mode (for testing)
+python -c "from ree_mcp.interface.mcp_server import mcp; mcp.run(transport='http', port=8000)"
+```
 
-### Adding New Indicators
+---
 
-1. Check `ree_docs.md` for indicator ID and details
-2. Use existing tools (`get_indicator_data`) - no code changes needed
-3. Optionally add convenience wrapper in `mcp_server.py` (like `get_demand_summary`)
+## 🎓 Learn AI & Build More Projects
 
-## Configuration
+This project was created by **[Javi Santos](https://www.linkedin.com/in/francisco-javier-santos-criado/)**, AI & Robotics Specialist with published research in:
+- 🔬 Surgical gauze detection using Convolutional Neural Networks
+- 🧠 Large Language Model interpretability in diverse knowledge scenarios
 
-Configuration is managed through environment variables (`.env` file):
+### 📚 La Escuela de IA
+
+Want to learn AI **without the fluff** and build projects like this?
+
+Join **[La Escuela de IA](https://skool.com/la-escuela-de-ia-9955)** - the Spanish AI learning community where you'll find:
+
+- 🎯 **Real-world practice** - Build actual AI projects, not toy examples
+- 🇪🇸 **Content in Spanish** - Finally, AI education in your language
+- 🛠️ **Practical resources** - Code, tutorials, and hands-on examples
+- 👥 **Active community** - Learn with other Spanish-speaking AI enthusiasts
+
+👉 **[Join La Escuela de IA](https://skool.com/la-escuela-de-ia-9955)**
+
+### 📺 YouTube Channel
+
+Subscribe to **[JavadexAI](https://www.youtube.com/@JavadexAI)** for:
+- 🎥 AI tutorials and project walkthroughs
+- 💡 LLM applications and MCP servers
+- 🚀 Real-world AI implementation strategies
+
+### 🤝 Connect
+
+- **LinkedIn**: [Javi Santos](https://www.linkedin.com/in/francisco-javier-santos-criado/)
+- **YouTube**: [@JavadexAI](https://www.youtube.com/@JavadexAI)
+- **Escuela de IA**: [skool.com/la-escuela-de-ia-9955](https://skool.com/la-escuela-de-ia-9955)
+
+---
+
+## ⚙️ Advanced Configuration
+
+### Environment Variables
+
+Create a `.env` file to customize behavior:
 
 ```env
-REE_API_TOKEN=your_api_token_here
+# Required
+REE_API_TOKEN=your_token_here
+
+# Optional (defaults shown)
 REE_API_BASE_URL=https://api.esios.ree.es
 REQUEST_TIMEOUT=30
 MAX_RETRIES=3
 RETRY_BACKOFF_FACTOR=0.5
 ```
 
-## Error Handling
+### Manual Claude Code Setup
 
-The server implements comprehensive error handling:
+If you prefer manual configuration over the installation script:
 
-- **Domain Errors**: `InvalidIndicatorIdError`, `InvalidDateRangeError`, `IndicatorNotFoundError`, `NoDataAvailableError`
-- **Infrastructure Errors**: Automatic retry on transient failures (HTTP 500, timeouts)
-- **Validation Errors**: Pydantic validation for all inputs
+#### Option 1: Local Installation
 
-All errors are returned as JSON with descriptive messages.
+1. Edit `.claude_mcp_config.json` with your token
+2. Update the `command` path if needed
+3. In Claude Code, run `/config-mcp` and paste the configuration
 
-## API Rate Limits
+#### Option 2: Direct from GitHub (uvx)
 
-- No official rate limits documented by REE
-- Recommended: Max 10 requests per second
-- The client implements automatic retry with exponential backoff
+1. Edit `.claude_mcp_config_uvx.json` with your token
+2. In Claude Code, run `/config-mcp` and paste the configuration
+3. No local installation needed - runs directly from GitHub!
 
-## Best Practices
+---
 
-1. **Date Ranges**:
-   - Maximum 366 days per request
-   - Use dates 3+ days old for most reliable data
-   - Recent data may not be finalized
+## 🔥 Features
 
-2. **Time Granularity**:
-   - Use `raw` for detailed 5-minute data
-   - Use `hour` for standard monitoring
-   - Use `day` for long-term trends
+### 🎯 Production-Ready
 
-3. **Indicator Selection**:
-   - Prefer "T.Real" (real-time) indicators
-   - Use `search_indicators` to find relevant indicators
-   - Check `ree_docs.md` for full catalog
+- ✅ Automatic retry with exponential backoff
+- ✅ Comprehensive error handling and validation
+- ✅ Type-safe configuration with Pydantic
+- ✅ Async/await for optimal performance
+- ✅ Context managers for proper resource cleanup
 
-## Testing
+### 🧪 Well-Tested
 
-The project includes three levels of testing:
+- **59 comprehensive tests** covering all layers
+- **Unit tests** - Pure domain logic (no mocks!)
+- **Integration tests** - Infrastructure with mocked HTTP
+- **E2E tests** - Complete workflow validation
+- **High coverage** of critical paths
 
-- **Unit Tests** (`tests/unit/`): Test domain logic in isolation
-- **Integration Tests** (`tests/integration/`): Test infrastructure with mocked HTTP
-- **E2E Tests** (`tests/e2e/`): Test complete workflows
+### 📝 Best Practices
 
-All tests use pytest and achieve high coverage of critical paths.
+- **Date Ranges**: Max 366 days per request
+- **Data Freshness**: Use dates 3+ days old for most reliable data
+- **Time Granularity**:
+  - `raw` for 5-minute detail
+  - `hour` for standard monitoring
+  - `day` for long-term trends
+- **Rate Limits**: Max ~10 requests/second (automatic retry on failures)
 
-## Contributing
+---
 
-This is a production-ready implementation following industry best practices:
+## 🤝 Contributing
 
-- Domain-Driven Design (DDD)
-- SOLID principles
-- Clean Architecture
-- Type safety (mypy strict)
-- Comprehensive testing
-- No mocking in domain layer (pure functions)
+Contributions are welcome! This codebase follows strict architectural principles:
 
-## License
+- **Domain-Driven Design** - Keep domain pure, no external dependencies
+- **Clean Architecture** - Respect layer boundaries
+- **SOLID Principles** - Single responsibility, open/closed, etc.
+- **NO Mocking in Domain** - Domain tests must be pure
+- **Type Safety** - All code must pass mypy strict mode
+- **Testing** - New features require tests
+
+See `CLAUDE.md` for detailed developer guidance.
+
+---
+
+## 📄 License
 
 This project is for educational and research purposes. The REE API is provided by Red Eléctrica de España.
 
-## Resources
+---
+
+## 🔗 Resources
 
 - **REE eSios API**: https://api.esios.ree.es/
 - **REE Portal**: https://www.esios.ree.es/
 - **FastMCP**: https://github.com/jlowin/fastmcp
-- **API Documentation**: See `ree_docs.md`
-
-## Support
-
-For issues with:
-- **This MCP Server**: Open an issue in this repository
-- **REE API**: Contact consultasios@ree.es
-- **FastMCP**: See https://github.com/jlowin/fastmcp
+- **Model Context Protocol**: https://modelcontextprotocol.io/
 
 ---
 
-Built with ❤️ using Domain-Driven Design and modern Python best practices.
+## 💬 Support
+
+### Issues & Questions
+
+- **MCP Server Issues**: [Open an issue](https://github.com/ESJavadex/ree-mcp/issues)
+- **REE API Questions**: consultasios@ree.es
+- **FastMCP Help**: https://github.com/jlowin/fastmcp
+
+### Learn More
+
+- 📚 Join [La Escuela de IA](https://skool.com/la-escuela-de-ia-9955) for AI learning in Spanish
+- 📺 Subscribe to [JavadexAI on YouTube](https://www.youtube.com/@JavadexAI)
+- 🤝 Connect on [LinkedIn](https://www.linkedin.com/in/francisco-javier-santos-criado/)
+
+---
+
+<div align="center">
+
+**Built with ❤️ using Domain-Driven Design and modern Python best practices**
+
+⭐ Star this repo if you find it useful!
+
+</div>
