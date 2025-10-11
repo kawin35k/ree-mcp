@@ -10,273 +10,275 @@
 
 </div>
 
-> Talk to Spain's electricity grid through Claude - no API knowledge required
+> Habla con la red eléctrica española a través de Claude - sin conocimientos técnicos
 
-A production-ready **MCP (Model Context Protocol)** server that lets you query Spanish electricity data using natural language. Ask Claude about demand, generation, prices, and emissions - it handles all the technical details.
+Un servidor **MCP (Model Context Protocol)** listo para producción que te permite consultar datos de electricidad en España usando lenguaje natural. Pregunta a Claude sobre demanda, generación, precios y emisiones - él se encarga de todos los detalles técnicos.
 
-Built with **Domain-Driven Design**, **Clean Architecture**, and **comprehensive testing** by [Javi Santos](https://www.linkedin.com/in/francisco-javier-santos-criado/) - AI & Robotics Specialist with published research in computer vision and LLM interpretability.
+Construido con **Domain-Driven Design**, **Clean Architecture** y **testing exhaustivo** por [Javi Santos](https://www.linkedin.com/in/francisco-javier-santos-criado/) - Especialista en IA y Robótica con investigación publicada en visión por computador e interpretabilidad de LLMs.
 
----
-
-## 🎯 Why This Exists
-
-**Red Eléctrica de España (REE)** manages Spain's electricity grid 24/7, publishing data every 5 minutes. This MCP server makes that data accessible through natural conversation with Claude.
-
-### Why I Built This
-
-*By [Javi Santos](https://www.linkedin.com/in/francisco-javier-santos-criado/)*
-
-I wanted to **democratize access** to critical infrastructure data. Instead of writing Python scripts, I wanted conversations like this:
-
-**You:** *"Check what happened on April 28, 2025"*
-
-**Claude:** *Analyzes grid data...*
-
-🚨 **CRITICAL EVENT DETECTED - April 28, 2025 at 12:35h**
-
-**Massive Grid Collapse:**
-- **11,000 MW lost in 5 minutes** (43% capacity drop)
-- System fell from 25,184 MW → 14,185 MW instantly
-- Compatible with cascading blackout scenario
-- Recovery took 10+ hours
-
-**Analysis:**
-- 11:00-12:30: System stable, no warnings
-- 12:30-12:35: Catastrophic instantaneous failure
-- 12:35-13:35: Continued degradation to 9,635 MW minimum
-- Likely cause: Nuclear plant trip → frequency collapse → cascade
-
-*This would be one of Spain's worst blackouts in modern history.*
+> 💡 **¿Quieres aprender a construir proyectos así?** Únete a [La Escuela de IA](https://skool.com/la-escuela-de-ia-9955) - la comunidad donde aprenderás IA práctica, sin humo, con ejemplos reales en español.
 
 ---
 
-**That's the power of this MCP server.** You can investigate grid events, analyze renewable vs fossil generation trends, correlate prices with demand, or track Spain's decarbonization progress - all through natural conversation with Claude.
+## 🎯 ¿Por qué existe esto?
 
-No API documentation. No Python scripts. Just ask.
+**Red Eléctrica de España (REE)** gestiona la red eléctrica española 24/7, publicando datos cada 5 minutos. Este servidor MCP hace esos datos accesibles mediante conversación natural con Claude.
+
+### Por qué lo construí
+
+*Por [Javi Santos](https://www.linkedin.com/in/francisco-javier-santos-criado/)*
+
+Quería **democratizar el acceso** a datos críticos de infraestructura. En lugar de escribir scripts de Python, quería conversaciones como esta:
+
+**Tú:** *"Comprueba qué pasó el 28 de abril de 2025"*
+
+**Claude:** *Analiza datos de la red...*
+
+🚨 **EVENTO CRÍTICO DETECTADO - 28 de Abril de 2025 a las 12:35h**
+
+**Colapso Masivo de la Red:**
+- **11.000 MW perdidos en 5 minutos** (caída del 43% de capacidad)
+- El sistema cayó de 25.184 MW → 14.185 MW instantáneamente
+- Compatible con escenario de apagón en cascada
+- La recuperación tardó más de 10 horas
+
+**Análisis:**
+- 11:00-12:30: Sistema estable, sin avisos previos
+- 12:30-12:35: Fallo catastrófico instantáneo
+- 12:35-13:35: Degradación continua hasta mínimo de 9.635 MW
+- Causa probable: Disparo de planta nuclear → colapso de frecuencia → cascada
+
+*Este sería uno de los peores apagones de España en la historia moderna.*
 
 ---
 
-## 🚀 Quick Start
+**Ese es el poder de este servidor MCP.** Puedes investigar eventos en la red, analizar tendencias renovables vs fósiles, correlacionar precios con demanda, o seguir la descarbonización de España - todo mediante conversación natural con Claude.
 
-Get up and running in 3 minutes:
+Sin documentación de API. Sin scripts de Python. Solo pregunta.
 
-### 1️⃣ Clone & Install
+---
+
+## 🚀 Inicio Rápido
+
+Funcional en 3 minutos:
+
+### 1️⃣ Clonar e Instalar
 
 ```bash
-# Clone the repository
+# Clonar el repositorio
 git clone https://github.com/ESJavadex/ree-mcp.git
 cd ree-mcp
 
-# Install uv (fast Python package manager)
+# Instalar uv (gestor rápido de paquetes Python)
 curl -LsSf https://astral.sh/uv/install.sh | sh
-# Or on macOS: brew install uv
+# O en macOS: brew install uv
 
-# Create virtual environment and install dependencies
+# Crear entorno virtual e instalar dependencias
 uv venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+source .venv/bin/activate  # En Windows: .venv\Scripts\activate
 uv pip install -e ".[dev]"
 ```
 
-### 2️⃣ Configure API Token
+### 2️⃣ Configurar Token de API
 
 ```bash
-# Copy the example environment file
+# Copiar el archivo de ejemplo
 cp .env.example .env
 
-# Edit .env and add your token (demo token included for testing)
-# REE_API_TOKEN=your_token_here
+# Editar .env y añadir tu token (incluye token demo para pruebas)
+# REE_API_TOKEN=tu_token_aqui
 ```
 
-**Getting an API Token:**
-- **Testing/Demo**: The repository includes a demo token in `.env.example`
-- **Production**: Email consultasios@ree.es to request your own REE API token
+**Obtener un Token de API:**
+- **Pruebas/Demo**: El repositorio incluye un token demo en `.env.example`
+- **Producción**: Envía email a consultasios@ree.es para solicitar tu token de API de REE
 
-### 3️⃣ Add to Claude Code
+### 3️⃣ Añadir a Claude Code
 
 ```bash
-# Run the installation script (reads token from .env automatically)
+# Ejecutar el script de instalación (lee el token de .env automáticamente)
 ./INSTALL_COMMAND.sh
 
-# Verify installation
+# Verificar instalación
 claude mcp list
 ```
 
-You should see `ree-mcp: ✓ Connected` in the output.
+Deberías ver `ree-mcp: ✓ Connected` en la salida.
 
-### 4️⃣ Start Using in Claude!
+### 4️⃣ ¡Empieza a Usar Claude!
 
-Open Claude Code and try:
-- *"Show me the current electricity demand in Spain"*
-- *"What's the generation mix right now?"*
-- *"Compare solar vs wind generation today"*
-- *"Search for price indicators"*
-
----
-
-## 💬 What Can You Ask Claude?
-
-Once installed, Claude can answer questions like:
-
-### 📊 Grid Operations
-- *"What's Spain's electricity demand right now?"*
-- *"Show me the generation mix at noon yesterday"*
-- *"How much power did Spain export last Tuesday?"*
-- *"Compare demand today vs last week"*
-
-### 🔍 Investigation & Analysis
-- *"Investigate what happened on April 28, 2025"* → Claude analyzes grid collapse events
-- *"Was there any unusual activity in the grid last month?"*
-- *"Find the peak demand day this year and explain why"*
-- *"Analyze the correlation between wind generation and prices"*
-
-### 🌱 Renewables & Emissions
-- *"How much solar power is Spain generating?"*
-- *"Compare renewable vs fossil generation this week"*
-- *"What are the current CO₂ emissions?"*
-- *"Show me the trend of wind power over the last 30 days"*
-
-### 💰 Market Analysis
-- *"What's the SPOT electricity price right now?"*
-- *"Find the cheapest hours to consume electricity today"*
-- *"Compare PVPC rates between weekdays and weekends"*
-- *"When was electricity most expensive this month?"*
-
-### 🔎 Discovery
-- *"Search for all indicators related to 'nuclear'"*
-- *"What data is available about hydroelectric generation?"*
-- *"Show me all price-related indicators"*
-
-Claude automatically uses the right tools, fetches the data, and presents it in context.
+Abre Claude Code y prueba:
+- *"Muéstrame la demanda eléctrica actual de España"*
+- *"¿Cuál es el mix de generación ahora?"*
+- *"Compara generación solar vs eólica hoy"*
+- *"Busca indicadores de precio"*
 
 ---
 
-## 📖 Common Indicator IDs
+## 💬 ¿Qué Puedes Preguntarle a Claude?
 
-Quick reference for frequently used indicators:
+Una vez instalado, Claude puede responder preguntas como:
 
-### ⚡ Demand
-- `1293` - Real Demand (Peninsular) - *MW, 5-minute updates*
-- `2037` - Real National Demand - *MW, 5-minute updates*
-- `1292` - Demand Forecast - *MW, hourly*
+### 📊 Operaciones de la Red
+- *"¿Cuál es la demanda eléctrica de España ahora mismo?"*
+- *"Muéstrame el mix de generación al mediodía de ayer"*
+- *"¿Cuánta energía exportó España el martes pasado?"*
+- *"Compara la demanda de hoy con la semana pasada"*
 
-### 🔋 Generation Sources
-- `549` - Nuclear - *MW, 5-minute*
-- `2038` - Wind (National) - *MW, 5-minute*
-- `1295` - Solar PV (Peninsular) - *MW, 5-minute*
-- `2041` - Combined Cycle (National) - *MW, 5-minute*
-- `2042` - Hydroelectric (National) - *MW, 5-minute*
+### 🔍 Investigación y Análisis
+- *"Investiga qué pasó el 28 de abril de 2025"* → Claude analiza eventos de colapso de red
+- *"¿Hubo alguna actividad inusual en la red el mes pasado?"*
+- *"Encuentra el día de pico de demanda este año y explica por qué"*
+- *"Analiza la correlación entre generación eólica y precios"*
 
-### 💵 Prices
-- `600` - SPOT Market Price - *€/MWh, 15-minute*
-- `1013` - PVPC Rate - *€/MWh, hourly*
+### 🌱 Renovables y Emisiones
+- *"¿Cuánta energía solar está generando España?"*
+- *"Compara generación renovable vs fósil esta semana"*
+- *"¿Cuáles son las emisiones de CO₂ actuales?"*
+- *"Muéstrame la tendencia de energía eólica en los últimos 30 días"*
 
-### 🌱 Emissions
-- `10355` - CO₂ Emissions - *tCO₂eq, 5-minute*
+### 💰 Análisis de Mercado
+- *"¿Cuál es el precio SPOT de electricidad ahora?"*
+- *"Encuentra las horas más baratas para consumir electricidad hoy"*
+- *"Compara tarifas PVPC entre días laborables y fines de semana"*
+- *"¿Cuándo fue la electricidad más cara este mes?"*
+
+### 🔎 Descubrimiento
+- *"Busca todos los indicadores relacionados con 'nuclear'"*
+- *"¿Qué datos hay disponibles sobre generación hidroeléctrica?"*
+- *"Muéstrame todos los indicadores relacionados con precios"*
+
+Claude usa automáticamente las herramientas correctas, obtiene los datos y los presenta en contexto.
 
 ---
 
-## 🏗️ Architecture
+## 📖 IDs de Indicadores Comunes
 
-Built following **industry best practices**:
+Referencia rápida para indicadores frecuentes:
+
+### ⚡ Demanda
+- `1293` - Demanda Real (Peninsular) - *MW, actualizaciones cada 5 minutos*
+- `2037` - Demanda Real Nacional - *MW, actualizaciones cada 5 minutos*
+- `1292` - Previsión de Demanda - *MW, horaria*
+
+### 🔋 Fuentes de Generación
+- `549` - Nuclear - *MW, cada 5 minutos*
+- `2038` - Eólica (Nacional) - *MW, cada 5 minutos*
+- `1295` - Solar FV (Peninsular) - *MW, cada 5 minutos*
+- `2041` - Ciclo Combinado (Nacional) - *MW, cada 5 minutos*
+- `2042` - Hidráulica (Nacional) - *MW, cada 5 minutos*
+
+### 💵 Precios
+- `600` - Precio Mercado SPOT - *€/MWh, cada 15 minutos*
+- `1013` - Tarifa PVPC - *€/MWh, horaria*
+
+### 🌱 Emisiones
+- `10355` - Emisiones de CO₂ - *tCO₂eq, cada 5 minutos*
+
+---
+
+## 🏗️ Arquitectura
+
+Construido siguiendo **mejores prácticas de la industria**:
 
 ```
 📦 ree-mcp
-├── 🎯 domain/           # Pure business logic (NO external dependencies)
+├── 🎯 domain/           # Lógica de negocio pura (SIN dependencias externas)
 │   ├── entities/        # Indicator, IndicatorData, IndicatorValue
 │   ├── value_objects/   # IndicatorId, DateTimeRange, TimeGranularity
-│   ├── repositories/    # Abstract interfaces
-│   └── exceptions.py    # Domain-specific errors
-├── 🚀 application/      # Use cases & DTOs
+│   ├── repositories/    # Interfaces abstractas
+│   └── exceptions.py    # Errores específicos del dominio
+├── 🚀 application/      # Casos de uso y DTOs
 │   ├── use_cases/       # GetIndicatorData, ListIndicators, SearchIndicators
-│   └── dtos/           # Request/Response objects
-├── 🔧 infrastructure/   # External dependencies
-│   ├── http/           # REE API client with retry logic
-│   ├── repositories/   # Repository implementations
-│   └── config/         # Settings management
-└── 🌐 interface/       # MCP server
-    └── mcp_server.py   # FastMCP tools & resources
+│   └── dtos/           # Objetos Request/Response
+├── 🔧 infrastructure/   # Dependencias externas
+│   ├── http/           # Cliente API REE con lógica de reintentos
+│   ├── repositories/   # Implementaciones de repositorios
+│   └── config/         # Gestión de configuración
+└── 🌐 interface/       # Servidor MCP
+    └── mcp_server.py   # Herramientas y recursos FastMCP
 ```
 
-**Key Principles:**
-- ✅ **Domain-Driven Design (DDD)** - Clear separation of concerns
-- ✅ **Clean Architecture** - Dependencies point inward
-- ✅ **SOLID Principles** - All 5 implemented
-- ✅ **Type Safety** - 100% type-annotated with mypy strict mode
-- ✅ **NO Mocking** - Domain tests use pure functions
-- ✅ **Comprehensive Testing** - 59 tests (unit, integration, e2e)
+**Principios Clave:**
+- ✅ **Domain-Driven Design (DDD)** - Separación clara de responsabilidades
+- ✅ **Clean Architecture** - Dependencias apuntan hacia dentro
+- ✅ **Principios SOLID** - Los 5 implementados
+- ✅ **Type Safety** - 100% tipado con mypy en modo estricto
+- ✅ **SIN Mocking** - Tests de dominio usan funciones puras
+- ✅ **Testing Exhaustivo** - 59 tests (unitarios, integración, e2e)
 
 ---
 
-## 🧪 Testing & Development
+## 🧪 Testing y Desarrollo
 
-### Run Tests
+### Ejecutar Tests
 
 ```bash
-# All tests
+# Todos los tests
 pytest
 
-# Unit tests only (fast, no external dependencies)
+# Solo tests unitarios (rápidos, sin dependencias externas)
 pytest tests/unit/
 
-# With coverage report
+# Con reporte de cobertura
 pytest --cov=src/ree_mcp --cov-report=html
 ```
 
-### Code Quality
+### Calidad de Código
 
 ```bash
-# Type checking (mypy strict mode)
+# Type checking (modo estricto de mypy)
 mypy src/ree_mcp/
 
 # Linting
 ruff check .
 
-# Auto-fix issues
+# Auto-corregir problemas
 ruff check --fix .
 
-# Format code
+# Formatear código
 ruff format .
 ```
 
-### Run Server Standalone
+### Ejecutar Servidor en Modo Standalone
 
 ```bash
-# STDIO mode (for MCP)
+# Modo STDIO (para MCP)
 python -m ree_mcp
 
-# HTTP mode (for testing)
+# Modo HTTP (para testing)
 python -c "from ree_mcp.interface.mcp_server import mcp; mcp.run(transport='http', port=8000)"
 ```
 
 ---
 
-## 🎓 Learn AI & Build More Projects
+## 🎓 Aprende IA y Construye Más Proyectos
 
-This project was created by **[Javi Santos](https://www.linkedin.com/in/francisco-javier-santos-criado/)**, AI & Robotics Specialist with published research in:
-- 🔬 Surgical gauze detection using Convolutional Neural Networks
-- 🧠 Large Language Model interpretability in diverse knowledge scenarios
+Este proyecto fue creado por **[Javi Santos](https://www.linkedin.com/in/francisco-javier-santos-criado/)**, Especialista en IA y Robótica con investigación publicada en:
+- 🔬 Detección de gasas quirúrgicas usando Redes Neuronales Convolucionales
+- 🧠 Interpretabilidad de Modelos de Lenguaje en escenarios de conocimiento diverso
 
 ### 📚 La Escuela de IA
 
-Want to learn AI **without the fluff** and build projects like this?
+¿Quieres aprender IA **sin humo** y construir proyectos como este?
 
-Join **[La Escuela de IA](https://skool.com/la-escuela-de-ia-9955)** - the Spanish AI learning community where you'll find:
+Únete a **[La Escuela de IA](https://skool.com/la-escuela-de-ia-9955)** - la comunidad española de aprendizaje de IA donde encontrarás:
 
-- 🎯 **Real-world practice** - Build actual AI projects, not toy examples
-- 🇪🇸 **Content in Spanish** - Finally, AI education in your language
-- 🛠️ **Practical resources** - Code, tutorials, and hands-on examples
-- 👥 **Active community** - Learn with other Spanish-speaking AI enthusiasts
+- 🎯 **Práctica real** - Construye proyectos reales de IA, no ejemplos de juguete
+- 🇪🇸 **Contenido en español** - Por fin, educación en IA en tu idioma
+- 🛠️ **Recursos prácticos** - Código, tutoriales y ejemplos hands-on
+- 👥 **Comunidad activa** - Aprende con otros entusiastas de la IA hispanohablantes
 
-👉 **[Join La Escuela de IA](https://skool.com/la-escuela-de-ia-9955)**
+👉 **[Únete a La Escuela de IA](https://skool.com/la-escuela-de-ia-9955)**
 
-### 📺 YouTube Channel
+### 📺 Canal de YouTube
 
-Subscribe to **[JavadexAI](https://www.youtube.com/@JavadexAI)** for:
-- 🎥 AI tutorials and project walkthroughs
-- 💡 LLM applications and MCP servers
-- 🚀 Real-world AI implementation strategies
+Suscríbete a **[JavadexAI](https://www.youtube.com/@JavadexAI)** para:
+- 🎥 Tutoriales de IA y recorridos de proyectos
+- 💡 Aplicaciones de LLMs y servidores MCP
+- 🚀 Estrategias de implementación de IA en el mundo real
 
-### 🤝 Connect
+### 🤝 Conecta
 
 - **LinkedIn**: [Javi Santos](https://www.linkedin.com/in/francisco-javier-santos-criado/)
 - **YouTube**: [@JavadexAI](https://www.youtube.com/@JavadexAI)
@@ -284,121 +286,125 @@ Subscribe to **[JavadexAI](https://www.youtube.com/@JavadexAI)** for:
 
 ---
 
-## ⚙️ Advanced Configuration
+## ⚙️ Configuración Avanzada
 
-### Environment Variables
+### Variables de Entorno
 
-Create a `.env` file to customize behavior:
+Crea un archivo `.env` para personalizar el comportamiento:
 
 ```env
-# Required
-REE_API_TOKEN=your_token_here
+# Requerido
+REE_API_TOKEN=tu_token_aqui
 
-# Optional (defaults shown)
+# Opcional (valores por defecto mostrados)
 REE_API_BASE_URL=https://api.esios.ree.es
 REQUEST_TIMEOUT=30
 MAX_RETRIES=3
-RETRY_BACKOFF_FACTOR=0.5
+RETRY_BACKOFF_FACTOR=0,5
 ```
 
-### Manual Claude Code Setup
+### Configuración Manual de Claude Code
 
-If you prefer manual configuration over the installation script:
+Si prefieres configuración manual en lugar del script de instalación:
 
-#### Option 1: Local Installation
+#### Opción 1: Instalación Local
 
-1. Edit `.claude_mcp_config.json` with your token
-2. Update the `command` path if needed
-3. In Claude Code, run `/config-mcp` and paste the configuration
+1. Edita `.claude_mcp_config.json` con tu token
+2. Actualiza la ruta del `command` si es necesario
+3. En Claude Code, ejecuta `/config-mcp` y pega la configuración
 
-#### Option 2: Direct from GitHub (uvx)
+#### Opción 2: Directo desde GitHub (uvx)
 
-1. Edit `.claude_mcp_config_uvx.json` with your token
-2. In Claude Code, run `/config-mcp` and paste the configuration
-3. No local installation needed - runs directly from GitHub!
-
----
-
-## 🔥 Features
-
-### 🎯 Production-Ready
-
-- ✅ Automatic retry with exponential backoff
-- ✅ Comprehensive error handling and validation
-- ✅ Type-safe configuration with Pydantic
-- ✅ Async/await for optimal performance
-- ✅ Context managers for proper resource cleanup
-
-### 🧪 Well-Tested
-
-- **59 comprehensive tests** covering all layers
-- **Unit tests** - Pure domain logic (no mocks!)
-- **Integration tests** - Infrastructure with mocked HTTP
-- **E2E tests** - Complete workflow validation
-- **High coverage** of critical paths
-
-### 📝 Best Practices
-
-- **Date Ranges**: Max 366 days per request
-- **Data Freshness**: Use dates 3+ days old for most reliable data
-- **Time Granularity**:
-  - `raw` for 5-minute detail
-  - `hour` for standard monitoring
-  - `day` for long-term trends
-- **Rate Limits**: Max ~10 requests/second (automatic retry on failures)
+1. Edita `.claude_mcp_config_uvx.json` con tu token
+2. En Claude Code, ejecuta `/config-mcp` y pega la configuración
+3. No necesita instalación local - ¡se ejecuta directamente desde GitHub!
 
 ---
 
-## 🤝 Contributing
+## 🔥 Características
 
-Contributions are welcome! This codebase follows strict architectural principles:
+### 🎯 Listo para Producción
 
-- **Domain-Driven Design** - Keep domain pure, no external dependencies
-- **Clean Architecture** - Respect layer boundaries
-- **SOLID Principles** - Single responsibility, open/closed, etc.
-- **NO Mocking in Domain** - Domain tests must be pure
-- **Type Safety** - All code must pass mypy strict mode
-- **Testing** - New features require tests
+- ✅ Reintentos automáticos con backoff exponencial
+- ✅ Manejo exhaustivo de errores y validación
+- ✅ Configuración type-safe con Pydantic
+- ✅ Async/await para rendimiento óptimo
+- ✅ Context managers para limpieza apropiada de recursos
 
-See `CLAUDE.md` for detailed developer guidance.
+### 🧪 Bien Testeado
+
+- **59 tests exhaustivos** cubriendo todas las capas
+- **Tests unitarios** - Lógica pura de dominio (¡sin mocks!)
+- **Tests de integración** - Infraestructura con HTTP mockeado
+- **Tests E2E** - Validación de flujos completos
+- **Alta cobertura** de rutas críticas
+
+### 📝 Mejores Prácticas
+
+- **Rangos de Fechas**: Máximo 366 días por petición
+- **Frescura de Datos**: Usa fechas de 3+ días atrás para datos más fiables
+- **Granularidad Temporal**:
+  - `raw` para detalle de 5 minutos
+  - `hour` para monitorización estándar
+  - `day` para tendencias a largo plazo
+- **Límites de Tasa**: Máx. ~10 peticiones/segundo (reintentos automáticos en fallos)
 
 ---
 
-## 📄 License
+## 🤝 Contribuir
 
-This project is for educational and research purposes. The REE API is provided by Red Eléctrica de España.
+¡Las contribuciones son bienvenidas! Este código sigue principios arquitectónicos estrictos:
+
+- **Domain-Driven Design** - Mantén el dominio puro, sin dependencias externas
+- **Clean Architecture** - Respeta los límites de capas
+- **Principios SOLID** - Responsabilidad única, abierto/cerrado, etc.
+- **SIN Mocking en Dominio** - Los tests de dominio deben ser puros
+- **Type Safety** - Todo código debe pasar mypy en modo estricto
+- **Testing** - Las nuevas características requieren tests
+
+Ver `CLAUDE.md` para guía detallada de desarrolladores.
 
 ---
 
-## 🔗 Resources
+## 📄 Licencia
 
-- **REE eSios API**: https://api.esios.ree.es/
-- **REE Portal**: https://www.esios.ree.es/
+Este proyecto es con fines educativos e investigación. La API de REE es proporcionada por Red Eléctrica de España.
+
+**MIT License con Descargo de Responsabilidad** - Ver archivo `LICENSE` para detalles completos.
+
+⚠️ **Proyecto de Hobby**: Este software se proporciona "tal cual" sin garantías. No está garantizado que funcione perfectamente. Úsalo bajo tu propio riesgo.
+
+---
+
+## 🔗 Recursos
+
+- **API eSios de REE**: https://api.esios.ree.es/
+- **Portal REE**: https://www.esios.ree.es/
 - **FastMCP**: https://github.com/jlowin/fastmcp
 - **Model Context Protocol**: https://modelcontextprotocol.io/
 
 ---
 
-## 💬 Support
+## 💬 Soporte
 
-### Issues & Questions
+### Problemas y Preguntas
 
-- **MCP Server Issues**: [Open an issue](https://github.com/ESJavadex/ree-mcp/issues)
-- **REE API Questions**: consultasios@ree.es
-- **FastMCP Help**: https://github.com/jlowin/fastmcp
+- **Problemas del Servidor MCP**: [Abrir un issue](https://github.com/ESJavadex/ree-mcp/issues)
+- **Preguntas sobre API REE**: consultasios@ree.es
+- **Ayuda con FastMCP**: https://github.com/jlowin/fastmcp
 
-### Learn More
+### Aprende Más
 
-- 📚 Join [La Escuela de IA](https://skool.com/la-escuela-de-ia-9955) for AI learning in Spanish
-- 📺 Subscribe to [JavadexAI on YouTube](https://www.youtube.com/@JavadexAI)
-- 🤝 Connect on [LinkedIn](https://www.linkedin.com/in/francisco-javier-santos-criado/)
+- 📚 Únete a [La Escuela de IA](https://skool.com/la-escuela-de-ia-9955) para aprender IA en español
+- 📺 Suscríbete a [JavadexAI en YouTube](https://www.youtube.com/@JavadexAI)
+- 🤝 Conecta en [LinkedIn](https://www.linkedin.com/in/francisco-javier-santos-criado/)
 
 ---
 
 <div align="center">
 
-**Built with ❤️ using Domain-Driven Design and modern Python best practices**
+**Construido con ❤️ usando Domain-Driven Design y mejores prácticas modernas de Python**
 
-⭐ Star this repo if you find it useful!
+⭐ **¡Dale una estrella al repo si te resulta útil!**
 
 </div>
