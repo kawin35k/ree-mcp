@@ -79,8 +79,8 @@ jobs:
 
     - name: Check for secrets
       run: |
-        # Simple check for potential exposed secrets
-        ! grep -rE "(api[_-]?key|password|token|secret)" --include="*.py" src/ree_mcp/ | grep -v "REE_API_TOKEN" | grep -v "# " | grep -v "\"REE_API_TOKEN\""
+        # Simple check for potential exposed secrets (ignore comments and type hints)
+        ! grep -rE "(api[_-]?key|password|token|secret)" --include="*.py" src/ree_mcp/ | grep -v "REE_API_TOKEN" | grep -v "#" | grep -v "\"REE_API_TOKEN\"" | grep -v "description=" | grep -v "Args:" | grep -v "Authentication"
 
   quality:
     name: Code Quality

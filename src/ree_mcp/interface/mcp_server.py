@@ -12,6 +12,7 @@ from ..application.use_cases import (
     SearchIndicatorsUseCase,
 )
 from ..domain.exceptions import DomainException
+from ..domain.value_objects import IndicatorId
 from ..infrastructure.config import get_settings
 from ..infrastructure.http import REEApiClient
 from ..infrastructure.repositories import REEIndicatorRepository
