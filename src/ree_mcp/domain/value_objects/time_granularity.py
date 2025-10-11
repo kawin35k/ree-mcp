@@ -26,4 +26,4 @@ class TimeGranularity(str, Enum):
         """
         if self == TimeGranularity.RAW:
             return None
-        return self.value
+        return str(self.value)

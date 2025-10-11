@@ -1,7 +1,7 @@
 """Indicator value entity."""
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime as dt
 
 from ..value_objects import GeographicScope
 
@@ -18,8 +18,8 @@ class IndicatorValue:
     """
 
     value: float
-    datetime: datetime
-    datetime_utc: datetime
+    datetime: dt
+    datetime_utc: dt
     geo_scope: GeographicScope
 
     def __str__(self) -> str:

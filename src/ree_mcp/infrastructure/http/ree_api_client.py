@@ -153,7 +153,7 @@ class REEApiClient:
                     )
 
                 response.raise_for_status()
-                data = response.json()
+                data: dict[str, Any] = response.json()
 
                 # Check if response has empty values
                 if "indicator" in data:
