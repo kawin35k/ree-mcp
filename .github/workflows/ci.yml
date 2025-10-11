@@ -79,8 +79,9 @@ jobs:
 
     - name: Check for secrets
       run: |
-        # Simple check for potential exposed secrets (ignore comments and type hints)
-        ! grep -rE "(api[_-]?key|password|token|secret)" --include="*.py" src/ree_mcp/ | grep -v "REE_API_TOKEN" | grep -v "#" | grep -v "\"REE_API_TOKEN\"" | grep -v "description=" | grep -v "Args:" | grep -v "Authentication"
+        # Check for hardcoded secrets (not variable names or type hints)
+        # This allows legitimate use of variables like 'api_key' but catches actual secrets
+        ! grep -rE '(api[_-]?key|password|token|secret)["\s]*[=:]["\s]*[a-zA-Z0-9]{20,}' --include="*.py" src/ree_mcp/
 
   quality:
     name: Code Quality
