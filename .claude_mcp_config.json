@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "ree-mcp": {
+      "command": "/Users/javier.santos/javi-proyectos/ree-mcp/venv/bin/python",
+      "args": ["-m", "ree_mcp"],
+      "transport": "stdio",
+      "env": {
+        "REE_API_TOKEN": "YOUR_REE_API_TOKEN_HERE",
+        "PYTHONPATH": "/Users/javier.santos/javi-proyectos/ree-mcp/src"
+      }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "ree-mcp": {
+      "command": "python",
+      "args": ["-m", "ree_mcp"],
+      "cwd": "/Users/javier.santos/javi-proyectos/ree-mcp",
+      "env": {
+        "REE_API_TOKEN": "YOUR_REE_API_TOKEN_HERE"
+      }
+    }
+  }
+}
