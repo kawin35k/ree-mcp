@@ -10,6 +10,7 @@ jobs:
   e2e-tests:
     name: E2E Tests with Real API
     runs-on: ubuntu-latest
+    environment: production  # Uses production environment secrets
 
     steps:
     - name: Checkout code
