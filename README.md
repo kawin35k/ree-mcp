@@ -1,8 +1,18 @@
 # ⚡ REE MCP Server
 
-> Access Spanish electricity data (demand, generation, prices, emissions) through Claude using the REE eSios API
+<div align="center">
 
-A production-ready **MCP (Model Context Protocol)** server that brings real-time Spanish electricity data to Claude Code. Query demand, generation mix, prices, and emissions data with simple natural language - all powered by Red Eléctrica Española's official API.
+[![CI/CD](https://github.com/ESJavadex/ree-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/ESJavadex/ree-mcp/actions/workflows/ci.yml)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
+[![Type checked: mypy](https://img.shields.io/badge/type%20checked-mypy-blue.svg)](http://mypy-lang.org/)
+
+</div>
+
+> Talk to Spain's electricity grid through Claude - no API knowledge required
+
+A production-ready **MCP (Model Context Protocol)** server that lets you query Spanish electricity data using natural language. Ask Claude about demand, generation, prices, and emissions - it handles all the technical details.
 
 Built with **Domain-Driven Design**, **Clean Architecture**, and **comprehensive testing** by [Javi Santos](https://www.linkedin.com/in/francisco-javier-santos-criado/) - AI & Robotics Specialist with published research in computer vision and LLM interpretability.
 
@@ -10,18 +20,7 @@ Built with **Domain-Driven Design**, **Clean Architecture**, and **comprehensive
 
 ## 🎯 Why This Exists
 
-### The Story Behind REE
-
-**Red Eléctrica de España (REE)** is Spain's electricity transmission system operator - essentially the "nervous system" of Spain's power grid. They manage the delicate balance of electricity generation and consumption across the entire country, 24/7.
-
-Every 5 minutes, REE publishes **1,967+ indicators** covering:
-- How much electricity Spain is consuming right now
-- Where it's coming from (nuclear, wind, solar, hydro...)
-- How much it costs (SPOT market, PVPC rates)
-- Environmental impact (CO₂ emissions in real-time)
-- International electricity exchanges
-
-This data is **public** but historically trapped behind API endpoints that require technical knowledge to access.
+**Red Eléctrica de España (REE)** manages Spain's electricity grid 24/7, publishing data every 5 minutes. This MCP server makes that data accessible through natural conversation with Claude.
 
 ### Why I Built This
 
@@ -114,42 +113,40 @@ Open Claude Code and try:
 
 ---
 
-## 🎯 What Can You Do?
+## 💬 What Can You Ask Claude?
 
-### 📊 Real-Time Data Access
+Once installed, Claude can answer questions like:
 
-Query **1,967+ electricity indicators** including:
+### 📊 Grid Operations
+- *"What's Spain's electricity demand right now?"*
+- *"Show me the generation mix at noon yesterday"*
+- *"How much power did Spain export last Tuesday?"*
+- *"Compare demand today vs last week"*
 
-| Category | Examples |
-|----------|----------|
-| 💡 **Demand** | Real-time demand, forecasts, peaks |
-| 🏭 **Generation** | Nuclear, wind, solar, hydro, coal, gas |
-| 💰 **Prices** | SPOT market, PVPC rates |
-| 🌍 **Emissions** | CO₂ emissions in real-time |
-| 🔌 **Exchanges** | International imports/exports |
+### 🔍 Investigation & Analysis
+- *"Investigate what happened on April 28, 2025"* → Claude analyzes grid collapse events
+- *"Was there any unusual activity in the grid last month?"*
+- *"Find the peak demand day this year and explain why"*
+- *"Analyze the correlation between wind generation and prices"*
 
-### 🛠️ Available Tools
+### 🌱 Renewables & Emissions
+- *"How much solar power is Spain generating?"*
+- *"Compare renewable vs fossil generation this week"*
+- *"What are the current CO₂ emissions?"*
+- *"Show me the trend of wind power over the last 30 days"*
 
-The server exposes 5 MCP tools that Claude can use:
+### 💰 Market Analysis
+- *"What's the SPOT electricity price right now?"*
+- *"Find the cheapest hours to consume electricity today"*
+- *"Compare PVPC rates between weekdays and weekends"*
+- *"When was electricity most expensive this month?"*
 
-1. **`get_indicator_data`** - Get time-series data for any indicator
-2. **`list_indicators`** - Browse all 1,967+ available indicators
-3. **`search_indicators`** - Find indicators by keyword (e.g., "solar", "precio")
-4. **`get_demand_summary`** - Quick demand overview for a date
-5. **`get_generation_mix`** - Generation breakdown by source
+### 🔎 Discovery
+- *"Search for all indicators related to 'nuclear'"*
+- *"What data is available about hydroelectric generation?"*
+- *"Show me all price-related indicators"*
 
-### 💬 Example Queries
-
-Ask Claude naturally:
-
-```
-"What was the electricity demand yesterday at noon?"
-"Show me all solar generation indicators"
-"Get the SPOT price for the last 24 hours"
-"Compare nuclear vs renewable generation this week"
-```
-
-Claude will automatically choose the right tools and fetch the data!
+Claude automatically uses the right tools, fetches the data, and presents it in context.
 
 ---
 
