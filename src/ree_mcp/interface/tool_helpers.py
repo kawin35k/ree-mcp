@@ -5,9 +5,10 @@ and follow DRY, KISS, and SOLID principles.
 """
 
 import json
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from datetime import datetime
-from typing import Any, AsyncIterator
+from typing import Any
 
 from ..application.use_cases import (
     GetIndicatorDataUseCase,

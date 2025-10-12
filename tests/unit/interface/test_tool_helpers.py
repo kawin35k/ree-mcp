@@ -2,8 +2,6 @@
 
 import json
 
-import pytest
-
 from src.ree_mcp.domain.exceptions import InvalidIndicatorIdError
 from src.ree_mcp.interface.tool_helpers import DateTimeHelper, ResponseFormatter
 

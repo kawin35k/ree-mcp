@@ -1,6 +1,10 @@
 """Unit tests for indicator configuration."""
 
-from src.ree_mcp.interface.indicator_config import IndicatorCategory, IndicatorIDs, IndicatorMetadata
+from src.ree_mcp.interface.indicator_config import (
+    IndicatorCategory,
+    IndicatorIDs,
+    IndicatorMetadata,
+)
 
 
 class TestIndicatorMetadata:
@@ -26,7 +30,7 @@ class TestIndicatorMetadata:
         # Should not be able to modify attributes
         try:
             metadata.id = 456  # type: ignore[misc]
-            assert False, "Should not be able to modify frozen dataclass"
+            raise AssertionError("Should not be able to modify frozen dataclass")
         except (AttributeError, Exception):
             pass  # Expected - frozen dataclass
 

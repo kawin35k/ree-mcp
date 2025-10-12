@@ -4,7 +4,6 @@ This module provides MCP tools for accessing REE electricity data.
 Refactored to follow DRY, KISS, and SOLID principles.
 """
 
-import json
 from typing import Any
 
 from fastmcp import FastMCP
