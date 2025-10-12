@@ -152,6 +152,36 @@ Claude usa automáticamente las herramientas correctas, obtiene los datos y los 
 
 ---
 
+## 🛠️ Herramientas MCP Disponibles
+
+El servidor proporciona **14 herramientas** organizadas por caso de uso:
+
+### 🔍 Acceso de Bajo Nivel
+- `get_indicator_data` - Datos de series temporales para cualquier indicador
+- `list_indicators` - Listar 1.967+ indicadores con paginación
+- `search_indicators` - Buscar indicadores por palabra clave
+
+### ⚡ Demanda y Generación
+- `get_demand_summary` - Resumen rápido de demanda
+- `get_generation_mix` - Desglose de generación en un momento específico
+- `get_generation_mix_timeline` - Desglose de generación a lo largo del tiempo
+
+### 🌱 Renovables y Sostenibilidad
+- `get_renewable_summary` - Análisis de generación renovable con % de demanda
+- `get_carbon_intensity` - Emisiones de CO₂ por kWh con clasificación de calidad
+
+### ⚙️ Operaciones de Red y Estabilidad
+- `get_grid_stability` - Balance sincrónico vs renovable variable con análisis de inercia
+- `get_storage_operations` - Eficiencia de almacenamiento por bombeo
+- `get_international_exchanges` - Flujos eléctricos transfronterizos por país
+
+### 💰 Mercado y Previsión
+- `get_price_analysis` - Análisis de precios SPOT con comparación multipaís
+- `compare_forecast_actual` - Métricas de precisión de previsión de demanda
+- `get_peak_analysis` - Patrones de demanda pico y factores de carga
+
+---
+
 ## 📖 IDs de Indicadores Comunes
 
 Referencia rápida para indicadores frecuentes:
