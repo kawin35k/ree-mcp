@@ -12,23 +12,23 @@
 
 > Habla con la red eléctrica española a través de Claude - sin conocimientos técnicos
 
-Un servidor **MCP (Model Context Protocol)** listo para producción que te permite consultar datos de electricidad en España usando lenguaje natural. Pregunta a Claude sobre demanda, generación, precios y emisiones - él se encarga de todos los detalles técnicos.
+Pregunta a Claude sobre **demanda, generación, precios y emisiones** de electricidad en España usando lenguaje natural. Él se encarga de todos los detalles técnicos.
 
-Construido con **Domain-Driven Design**, **Clean Architecture** y **testing exhaustivo** por [Javi Santos](https://www.linkedin.com/in/francisco-javier-santos-criado/) - Especialista en IA y Robótica con investigación publicada en visión por computador e interpretabilidad de LLMs.
+Construido con **Domain-Driven Design** y **Clean Architecture** por [Javi Santos](https://www.linkedin.com/in/francisco-javier-santos-criado/) - Especialista en IA y Robótica con investigación publicada en visión por computador e interpretabilidad de LLMs.
 
 > 💡 **¿Quieres aprender a construir proyectos así?** Únete a [La Escuela de IA](https://skool.com/la-escuela-de-ia-9955) - la comunidad donde aprenderás IA práctica, sin humo, con ejemplos reales en español.
 
 ---
 
-## 🎯 ¿Por qué existe esto?
+## 🎯 ¿Qué Hace Este Servidor?
 
 **Red Eléctrica de España (REE)** gestiona la red eléctrica española 24/7, publicando datos cada 5 minutos. Este servidor MCP hace esos datos accesibles mediante conversación natural con Claude.
 
-### Por qué lo construí
+### El Poder de Conversaciones con Datos Reales
 
 *Por [Javi Santos](https://www.linkedin.com/in/francisco-javier-santos-criado/)*
 
-Quería **democratizar el acceso** a datos críticos de infraestructura. En lugar de escribir scripts de Python, quería conversaciones como esta:
+En lugar de escribir scripts de Python, imagina conversaciones como esta:
 
 **Tú:** *"Comprueba qué pasó el 28 de abril de 2025"*
 
@@ -52,15 +52,13 @@ Quería **democratizar el acceso** a datos críticos de infraestructura. En luga
 
 ---
 
-**Ese es el poder de este servidor MCP.** Puedes investigar eventos en la red, analizar tendencias renovables vs fósiles, correlacionar precios con demanda, o seguir la descarbonización de España - todo mediante conversación natural con Claude.
+**Ese es el poder de este servidor.** Investiga eventos en la red, analiza tendencias renovables vs fósiles, correlaciona precios con demanda, o sigue la descarbonización de España - todo mediante conversación natural.
 
-Sin documentación de API. Sin scripts de Python. Solo pregunta.
+Sin documentación de API. Sin scripts. Solo pregunta.
 
 ---
 
-## 🚀 Inicio Rápido
-
-Funcional en 3 minutos:
+## 🚀 Instalación (3 minutos)
 
 ### 1️⃣ Clonar e Instalar
 
@@ -73,7 +71,7 @@ cd ree-mcp
 curl -LsSf https://astral.sh/uv/install.sh | sh
 # O en macOS: brew install uv
 
-# Crear entorno virtual e instalar dependencias
+# Crear entorno virtual e instalar
 uv venv
 source .venv/bin/activate  # En Windows: .venv\Scripts\activate
 uv pip install -e ".[dev]"
@@ -82,211 +80,93 @@ uv pip install -e ".[dev]"
 ### 2️⃣ Configurar Token de API
 
 ```bash
-# Copiar el archivo de ejemplo
+# Copiar el archivo de ejemplo (incluye token demo)
 cp .env.example .env
 
-# Editar .env y añadir tu token (incluye token demo para pruebas)
+# Editar .env si necesitas tu propio token
 # REE_API_TOKEN=tu_token_aqui
 ```
 
-**Obtener un Token de API:**
-- **Pruebas/Demo**: El repositorio incluye un token demo en `.env.example`
-- **Producción**: Envía email a consultasios@ree.es para solicitar tu token de API de REE
+**Obtener Token:**
+- **Pruebas/Demo**: Ya incluido en `.env.example`
+- **Producción**: Email a consultasios@ree.es
 
 ### 3️⃣ Añadir a Claude Code
 
 ```bash
-# Ejecutar el script de instalación (lee el token de .env automáticamente)
+# Ejecutar el script de instalación
 ./INSTALL_COMMAND.sh
 
-# Verificar instalación
+# Verificar
 claude mcp list
 ```
 
-Deberías ver `ree-mcp: ✓ Connected` en la salida.
+Deberías ver `ree-mcp: ✓ Connected`.
 
-### 4️⃣ ¡Empieza a Usar Claude!
+### 4️⃣ ¡Listo! Empieza a Preguntar
 
 Abre Claude Code y prueba:
 - *"Muéstrame la demanda eléctrica actual de España"*
 - *"¿Cuál es el mix de generación ahora?"*
 - *"Compara generación solar vs eólica hoy"*
-- *"Busca indicadores de precio"*
 
 ---
 
-## 💬 ¿Qué Puedes Preguntarle a Claude?
+## 💬 ¿Qué Puedes Preguntar?
 
-Una vez instalado, Claude puede responder preguntas como:
-
-### 📊 Operaciones de la Red
+### 📊 Operaciones en Tiempo Real
 - *"¿Cuál es la demanda eléctrica de España ahora mismo?"*
-- *"Muéstrame el mix de generación al mediodía de ayer"*
-- *"¿Cuánta energía exportó España el martes pasado?"*
+- *"Muéstrame el mix de generación al mediodía"*
+- *"¿Cuánta energía exportó España ayer?"*
 - *"Compara la demanda de hoy con la semana pasada"*
+- *"¿Qué está generando cada central ahora? (nuclear, eólica, solar...)"*
 
-### 🔍 Investigación y Análisis
-- *"Investiga qué pasó el 28 de abril de 2025"* → Claude analiza eventos de colapso de red
-- *"¿Hubo alguna actividad inusual en la red el mes pasado?"*
+### 🔍 Investigación y Análisis de Eventos
+- *"Investiga qué pasó el 28 de abril de 2025"*
+- *"¿Hubo actividad inusual en la red el mes pasado?"*
 - *"Encuentra el día de pico de demanda este año y explica por qué"*
 - *"Analiza la correlación entre generación eólica y precios"*
+- *"Detecta patrones anómalos en la última semana"*
+- *"¿Cuándo fue la última vez que hubo un apagón o evento crítico?"*
 
-### 🌱 Renovables y Emisiones
+### 🌱 Energías Renovables y Emisiones
 - *"¿Cuánta energía solar está generando España?"*
 - *"Compara generación renovable vs fósil esta semana"*
-- *"¿Cuáles son las emisiones de CO₂ actuales?"*
+- *"¿Cuáles son las emisiones de CO₂ actuales? (gCO₂/kWh)"*
 - *"Muéstrame la tendencia de energía eólica en los últimos 30 días"*
+- *"¿Qué porcentaje de la demanda viene de renovables?"*
+- *"¿Cuándo fue el día más limpio (menos CO₂) este mes?"*
 
-### 💰 Análisis de Mercado
+### 💰 Análisis de Precios y Mercado
 - *"¿Cuál es el precio SPOT de electricidad ahora?"*
 - *"Encuentra las horas más baratas para consumir electricidad hoy"*
 - *"Compara tarifas PVPC entre días laborables y fines de semana"*
-- *"¿Cuándo fue la electricidad más cara este mes?"*
+- *"¿Cuándo fue la electricidad más cara este mes? ¿Por qué?"*
+- *"Muéstrame la correlación entre precios y generación renovable"*
 
-### 🔎 Descubrimiento
+### ⚙️ Estabilidad de Red y Almacenamiento
+- *"¿Cómo está la estabilidad de la red ahora? (inercia síncrona vs renovable variable)"*
+- *"¿Se están usando las centrales de bombeo para almacenar energía?"*
+- *"Muéstrame los flujos de importación/exportación con Francia y Portugal"*
+- *"¿Cuándo bombea agua la red y cuándo la turbina?"*
+
+### 🔎 Descubrimiento de Datos
 - *"Busca todos los indicadores relacionados con 'nuclear'"*
 - *"¿Qué datos hay disponibles sobre generación hidroeléctrica?"*
-- *"Muéstrame todos los indicadores relacionados con precios"*
+- *"Muéstrame todos los indicadores de precios"*
+- *"Lista los indicadores disponibles de emisiones y sostenibilidad"*
 
-Claude usa automáticamente las herramientas correctas, obtiene los datos y los presenta en contexto.
+### 📈 Comparativas y Tendencias
+- *"Compara la demanda de este mes vs el mismo mes del año pasado"*
+- *"¿Cómo ha evolucionado la generación solar en los últimos 6 meses?"*
+- *"Muéstrame el balance neto de exportación/importación del último mes"*
+- *"¿Cuándo alcanzamos el pico histórico de generación renovable?"*
 
----
-
-## 🛠️ Herramientas MCP Disponibles
-
-El servidor proporciona **14 herramientas** organizadas por caso de uso:
-
-### 🔍 Acceso de Bajo Nivel
-- `get_indicator_data` - Datos de series temporales para cualquier indicador
-- `list_indicators` - Listar 1.967+ indicadores con paginación
-- `search_indicators` - Buscar indicadores por palabra clave
-
-### ⚡ Demanda y Generación
-- `get_demand_summary` - Resumen rápido de demanda
-- `get_generation_mix` - Desglose de generación en un momento específico
-- `get_generation_mix_timeline` - Desglose de generación a lo largo del tiempo
-
-### 🌱 Renovables y Sostenibilidad
-- `get_renewable_summary` - Análisis de generación renovable con % de demanda
-- `get_carbon_intensity` - Emisiones de CO₂ por kWh con clasificación de calidad
-
-### ⚙️ Operaciones de Red y Estabilidad
-- `get_grid_stability` - Balance sincrónico vs renovable variable con análisis de inercia
-- `get_storage_operations` - Eficiencia de almacenamiento por bombeo
-- `get_international_exchanges` - Flujos eléctricos transfronterizos por país
-
-### 💰 Mercado y Previsión
-- `get_price_analysis` - Análisis de precios SPOT con comparación multipaís
-- `compare_forecast_actual` - Métricas de precisión de previsión de demanda
-- `get_peak_analysis` - Patrones de demanda pico y factores de carga
+Claude usa automáticamente las herramientas correctas, obtiene los datos y los presenta en contexto con análisis detallado.
 
 ---
 
-## 📖 IDs de Indicadores Comunes
-
-Referencia rápida para indicadores frecuentes:
-
-### ⚡ Demanda
-- `1293` - Demanda Real (Peninsular) - *MW, actualizaciones cada 5 minutos*
-- `2037` - Demanda Real Nacional - *MW, actualizaciones cada 5 minutos*
-- `1292` - Previsión de Demanda - *MW, horaria*
-
-### 🔋 Fuentes de Generación
-- `549` - Nuclear - *MW, cada 5 minutos*
-- `2038` - Eólica (Nacional) - *MW, cada 5 minutos*
-- `1295` - Solar FV (Peninsular) - *MW, cada 5 minutos*
-- `2041` - Ciclo Combinado (Nacional) - *MW, cada 5 minutos*
-- `2042` - Hidráulica (Nacional) - *MW, cada 5 minutos*
-
-### 💵 Precios
-- `600` - Precio Mercado SPOT - *€/MWh, cada 15 minutos*
-- `1013` - Tarifa PVPC - *€/MWh, horaria*
-
-### 🌱 Emisiones
-- `10355` - Emisiones de CO₂ - *tCO₂eq, cada 5 minutos*
-
----
-
-## 🏗️ Arquitectura
-
-Construido siguiendo **mejores prácticas de la industria**:
-
-```
-📦 ree-mcp
-├── 🎯 domain/                # Lógica de negocio pura (SIN dependencias externas)
-│   ├── entities/             # Indicator, IndicatorData, IndicatorValue
-│   ├── value_objects/        # IndicatorId, DateTimeRange, TimeGranularity
-│   ├── repositories/         # Interfaces abstractas
-│   └── exceptions.py         # Errores específicos del dominio
-├── 🚀 application/           # Casos de uso y DTOs
-│   ├── use_cases/            # GetIndicatorData, ListIndicators, SearchIndicators
-│   └── dtos/                # Objetos Request/Response
-├── 🔧 infrastructure/        # Dependencias externas
-│   ├── http/                # Cliente API REE con lógica de reintentos
-│   ├── repositories/        # Implementaciones de repositorios
-│   └── config/              # Gestión de configuración
-└── 🌐 interface/            # Capa de presentación MCP
-    ├── mcp_server.py        # Herramientas y recursos FastMCP (923 líneas)
-    ├── indicator_config.py  # IDs y metadatos centralizados de indicadores
-    ├── tool_helpers.py      # Clases helper (DateTimeHelper, ResponseFormatter, ToolExecutor)
-    └── tool_services.py     # Servicios de análisis complejo (Generation, Renewables, Grid)
-```
-
-**Principios Clave:**
-- ✅ **Domain-Driven Design (DDD)** - Separación clara de responsabilidades
-- ✅ **Clean Architecture** - Dependencias apuntan hacia dentro
-- ✅ **Principios SOLID** - Los 5 implementados (SRP, OCP, LSP, ISP, DIP)
-- ✅ **DRY & KISS** - Sin duplicación, lógica simple y clara
-- ✅ **Type Safety** - 100% tipado con mypy en modo estricto
-- ✅ **SIN Mocking** - Tests de dominio usan funciones puras
-- ✅ **Testing Exhaustivo** - 96 tests (unitarios, integración, e2e) con 90% cobertura
-
----
-
-## 🧪 Testing y Desarrollo
-
-### Ejecutar Tests
-
-```bash
-# Todos los tests
-pytest
-
-# Solo tests unitarios (rápidos, sin dependencias externas)
-pytest tests/unit/
-
-# Con reporte de cobertura
-pytest --cov=src/ree_mcp --cov-report=html
-```
-
-### Calidad de Código
-
-```bash
-# Type checking (modo estricto de mypy)
-mypy src/ree_mcp/
-
-# Linting
-ruff check .
-
-# Auto-corregir problemas
-ruff check --fix .
-
-# Formatear código
-ruff format .
-```
-
-### Ejecutar Servidor en Modo Standalone
-
-```bash
-# Modo STDIO (para MCP)
-python -m ree_mcp
-
-# Modo HTTP (para testing)
-python -c "from ree_mcp.interface.mcp_server import mcp; mcp.run(transport='http', port=8000)"
-```
-
----
-
-## 🎓 Aprende IA y Construye Más Proyectos
+## 🎓 Aprende a Construir Proyectos como Este
 
 Este proyecto fue creado por **[Javi Santos](https://www.linkedin.com/in/francisco-javier-santos-criado/)**, Especialista en IA y Robótica con investigación publicada en:
 - 🔬 Detección de gasas quirúrgicas usando Redes Neuronales Convolucionales
@@ -320,118 +200,63 @@ Suscríbete a **[JavadexAI](https://www.youtube.com/@JavadexAI)** para:
 
 ---
 
-## ⚙️ Configuración Avanzada
+## 🔥 Características Técnicas
 
-### Variables de Entorno
+### ✅ Listo para Producción
+- Reintentos automáticos con backoff exponencial
+- Manejo exhaustivo de errores y validación
+- Async/await para rendimiento óptimo
+- 96 tests exhaustivos con 90% cobertura
 
-Crea un archivo `.env` para personalizar el comportamiento:
+### 🏗️ Arquitectura Robusta
+- **Domain-Driven Design** - Lógica de negocio pura
+- **Clean Architecture** - Separación clara de responsabilidades
+- **Principios SOLID** - Código mantenible y extensible
+- **Type Safety** - 100% tipado con mypy modo estricto
 
-```env
-# Requerido
-REE_API_TOKEN=tu_token_aqui
-
-# Opcional (valores por defecto mostrados)
-REE_API_BASE_URL=https://api.esios.ree.es
-REQUEST_TIMEOUT=30
-MAX_RETRIES=3
-RETRY_BACKOFF_FACTOR=0,5
-```
-
-### Configuración Manual de Claude Code
-
-Si prefieres configuración manual en lugar del script de instalación:
-
-#### Opción 1: Instalación Local
-
-1. Edita `.claude_mcp_config.json` con tu token
-2. Actualiza la ruta del `command` si es necesario
-3. En Claude Code, ejecuta `/config-mcp` y pega la configuración
-
-#### Opción 2: Directo desde GitHub (uvx)
-
-1. Edita `.claude_mcp_config_uvx.json` con tu token
-2. En Claude Code, ejecuta `/config-mcp` y pega la configuración
-3. No necesita instalación local - ¡se ejecuta directamente desde GitHub!
-
----
-
-## 🔥 Características
-
-### 🎯 Listo para Producción
-
-- ✅ Reintentos automáticos con backoff exponencial
-- ✅ Manejo exhaustivo de errores y validación
-- ✅ Configuración type-safe con Pydantic
-- ✅ Async/await para rendimiento óptimo
-- ✅ Context managers para limpieza apropiada de recursos
-
-### 🧪 Bien Testeado
-
-- **96 tests exhaustivos** cubriendo todas las capas (90% cobertura)
-- **Tests unitarios** - Lógica pura de dominio + helpers (¡sin mocks!)
-- **Tests de integración** - Infraestructura con HTTP mockeado
-- **Tests E2E** - Validación de flujos completos end-to-end
-- **Alta cobertura** de rutas críticas y casos edge
-
-### 📝 Mejores Prácticas
-
-- **Rangos de Fechas**: Máximo 366 días por petición
-- **Frescura de Datos**: Usa fechas de 3+ días atrás para datos más fiables
-- **Granularidad Temporal**:
-  - `raw` para detalle de 5 minutos
-  - `hour` para monitorización estándar
-  - `day` para tendencias a largo plazo
-- **Límites de Tasa**: Máx. ~10 peticiones/segundo (reintentos automáticos en fallos)
+### 📊 Datos Completos
+- Acceso a **1.967+ indicadores** de REE
+- Datos cada 5 minutos en tiempo real
+- Histórico completo disponible
+- 14 herramientas MCP especializadas
 
 ---
 
 ## 🤝 Contribuir
 
-¡Las contribuciones son bienvenidas! Este código sigue principios arquitectónicos estrictos:
+¡Las contribuciones son bienvenidas! Ver `CLAUDE.md` para guía detallada de desarrolladores.
 
-- **Domain-Driven Design** - Mantén el dominio puro, sin dependencias externas
-- **Clean Architecture** - Respeta los límites de capas
-- **Principios SOLID** - Responsabilidad única, abierto/cerrado, etc.
-- **SIN Mocking en Dominio** - Los tests de dominio deben ser puros
-- **Type Safety** - Todo código debe pasar mypy en modo estricto
-- **Testing** - Las nuevas características requieren tests
-
-Ver `CLAUDE.md` para guía detallada de desarrolladores.
+Este código sigue principios arquitectónicos estrictos:
+- Domain-Driven Design
+- Clean Architecture
+- Principios SOLID
+- Testing exhaustivo
 
 ---
 
-## 📄 Licencia
+## 💬 Soporte y Recursos
 
-Este proyecto es con fines educativos e investigación. La API de REE es proporcionada por Red Eléctrica de España.
+### Problemas y Preguntas
+- **Problemas del Servidor**: [Abrir un issue](https://github.com/ESJavadex/ree-mcp/issues)
+- **Preguntas sobre API REE**: consultasios@ree.es
 
-**MIT License con Descargo de Responsabilidad** - Ver archivo `LICENSE` para detalles completos.
+### Aprende Más
+- 📚 [La Escuela de IA](https://skool.com/la-escuela-de-ia-9955) - Aprende IA en español
+- 📺 [JavadexAI en YouTube](https://www.youtube.com/@JavadexAI)
+- 🤝 [LinkedIn de Javi Santos](https://www.linkedin.com/in/francisco-javier-santos-criado/)
 
-⚠️ **Proyecto de Hobby**: Este software se proporciona "tal cual" sin garantías. No está garantizado que funcione perfectamente. Úsalo bajo tu propio riesgo.
-
----
-
-## 🔗 Recursos
-
+### Recursos
 - **API eSios de REE**: https://api.esios.ree.es/
-- **Portal REE**: https://www.esios.ree.es/
 - **FastMCP**: https://github.com/jlowin/fastmcp
 - **Model Context Protocol**: https://modelcontextprotocol.io/
 
 ---
 
-## 💬 Soporte
+## 📄 Licencia
 
-### Problemas y Preguntas
+**MIT License con Descargo de Responsabilidad** - Ver archivo `LICENSE` para detalles completos.
 
-- **Problemas del Servidor MCP**: [Abrir un issue](https://github.com/ESJavadex/ree-mcp/issues)
-- **Preguntas sobre API REE**: consultasios@ree.es
-- **Ayuda con FastMCP**: https://github.com/jlowin/fastmcp
-
-### Aprende Más
-
-- 📚 Únete a [La Escuela de IA](https://skool.com/la-escuela-de-ia-9955) para aprender IA en español
-- 📺 Suscríbete a [JavadexAI en YouTube](https://www.youtube.com/@JavadexAI)
-- 🤝 Conecta en [LinkedIn](https://www.linkedin.com/in/francisco-javier-santos-criado/)
+⚠️ **Proyecto Educativo**: Este software se proporciona "tal cual" sin garantías. Úsalo bajo tu propio riesgo.
 
 ---
 
