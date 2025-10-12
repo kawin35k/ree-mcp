@@ -2,8 +2,6 @@
 
 from datetime import datetime
 
-import pytest
-
 from src.ree_mcp.domain.entities import Indicator, IndicatorData, IndicatorValue
 from src.ree_mcp.domain.value_objects import (
     GeographicScope,

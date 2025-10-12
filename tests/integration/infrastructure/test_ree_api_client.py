@@ -4,7 +4,6 @@ These tests use pytest-httpx to mock HTTP responses without hitting the real API
 """
 
 import pytest
-from httpx import AsyncClient
 from pytest_httpx import HTTPXMock
 
 from src.ree_mcp.domain.exceptions import IndicatorNotFoundError, NoDataAvailableError

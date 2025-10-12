@@ -182,11 +182,11 @@ async def get_demand_summary(date: str = "2025-10-08") -> str:
         end_date = f"{date}T23:59"
 
         # Get real demand (indicator 1293)
-        real_demand_result = await get_indicator_data(1293, start_date, end_date, "hour")
+        real_demand_result = await get_indicator_data(1293, start_date, end_date, "hour")  # type: ignore[operator]
         demand_data = json.loads(real_demand_result)
 
         if "error" in demand_data:
-            return real_demand_result
+            return real_demand_result  # type: ignore[no-any-return]
 
         result = {
             "date": date,
@@ -281,7 +281,7 @@ async def list_all_indicators() -> str:
     Returns:
         JSON string with all indicator metadata.
     """
-    result: str = await list_indicators()
+    result: str = await list_indicators()  # type: ignore[operator]
     return result
 
 
