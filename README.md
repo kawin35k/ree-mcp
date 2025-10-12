@@ -213,29 +213,33 @@ Construido siguiendo **mejores prácticas de la industria**:
 
 ```
 📦 ree-mcp
-├── 🎯 domain/           # Lógica de negocio pura (SIN dependencias externas)
-│   ├── entities/        # Indicator, IndicatorData, IndicatorValue
-│   ├── value_objects/   # IndicatorId, DateTimeRange, TimeGranularity
-│   ├── repositories/    # Interfaces abstractas
-│   └── exceptions.py    # Errores específicos del dominio
-├── 🚀 application/      # Casos de uso y DTOs
-│   ├── use_cases/       # GetIndicatorData, ListIndicators, SearchIndicators
-│   └── dtos/           # Objetos Request/Response
-├── 🔧 infrastructure/   # Dependencias externas
-│   ├── http/           # Cliente API REE con lógica de reintentos
-│   ├── repositories/   # Implementaciones de repositorios
-│   └── config/         # Gestión de configuración
-└── 🌐 interface/       # Servidor MCP
-    └── mcp_server.py   # Herramientas y recursos FastMCP
+├── 🎯 domain/                # Lógica de negocio pura (SIN dependencias externas)
+│   ├── entities/             # Indicator, IndicatorData, IndicatorValue
+│   ├── value_objects/        # IndicatorId, DateTimeRange, TimeGranularity
+│   ├── repositories/         # Interfaces abstractas
+│   └── exceptions.py         # Errores específicos del dominio
+├── 🚀 application/           # Casos de uso y DTOs
+│   ├── use_cases/            # GetIndicatorData, ListIndicators, SearchIndicators
+│   └── dtos/                # Objetos Request/Response
+├── 🔧 infrastructure/        # Dependencias externas
+│   ├── http/                # Cliente API REE con lógica de reintentos
+│   ├── repositories/        # Implementaciones de repositorios
+│   └── config/              # Gestión de configuración
+└── 🌐 interface/            # Capa de presentación MCP
+    ├── mcp_server.py        # Herramientas y recursos FastMCP (923 líneas)
+    ├── indicator_config.py  # IDs y metadatos centralizados de indicadores
+    ├── tool_helpers.py      # Clases helper (DateTimeHelper, ResponseFormatter, ToolExecutor)
+    └── tool_services.py     # Servicios de análisis complejo (Generation, Renewables, Grid)
 ```
 
 **Principios Clave:**
 - ✅ **Domain-Driven Design (DDD)** - Separación clara de responsabilidades
 - ✅ **Clean Architecture** - Dependencias apuntan hacia dentro
-- ✅ **Principios SOLID** - Los 5 implementados
+- ✅ **Principios SOLID** - Los 5 implementados (SRP, OCP, LSP, ISP, DIP)
+- ✅ **DRY & KISS** - Sin duplicación, lógica simple y clara
 - ✅ **Type Safety** - 100% tipado con mypy en modo estricto
 - ✅ **SIN Mocking** - Tests de dominio usan funciones puras
-- ✅ **Testing Exhaustivo** - 59 tests (unitarios, integración, e2e)
+- ✅ **Testing Exhaustivo** - 96 tests (unitarios, integración, e2e) con 90% cobertura
 
 ---
 
@@ -363,11 +367,11 @@ Si prefieres configuración manual en lugar del script de instalación:
 
 ### 🧪 Bien Testeado
 
-- **59 tests exhaustivos** cubriendo todas las capas
-- **Tests unitarios** - Lógica pura de dominio (¡sin mocks!)
+- **96 tests exhaustivos** cubriendo todas las capas (90% cobertura)
+- **Tests unitarios** - Lógica pura de dominio + helpers (¡sin mocks!)
 - **Tests de integración** - Infraestructura con HTTP mockeado
-- **Tests E2E** - Validación de flujos completos
-- **Alta cobertura** de rutas críticas
+- **Tests E2E** - Validación de flujos completos end-to-end
+- **Alta cobertura** de rutas críticas y casos edge
 
 ### 📝 Mejores Prácticas
 

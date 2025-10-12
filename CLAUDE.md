@@ -140,13 +140,34 @@ This project implements **Clean Architecture** with **Domain-Driven Design (DDD)
 **Integration Tests** (`tests/integration/`): Test infrastructure with mocked HTTP (pytest-httpx).
 
 ### 4. Interface Layer (`src/ree_mcp/interface/`)
-**Exposes domain functionality via MCP protocol.**
+**Exposes domain functionality via MCP protocol. Refactored for maintainability following DRY, KISS, and SOLID principles.**
 
-- **MCP Server** (`mcp_server.py`): FastMCP integration
+- **MCP Server** (`mcp_server.py`): FastMCP integration (923 lines, 30% reduction from original)
   - **15 MCP Tools**: Low-level (`get_indicator_data`, `list_indicators`, `search_indicators`) + High-level convenience tools (demand, generation, renewables, carbon, pricing, storage, grid stability, forecasting)
   - **2 MCP Resources**: `ree://indicators`, `ree://indicators/{id}`
-  - Dependency injection via `_get_repository()`
+  - Uses helper classes and services for clean separation of concerns
   - Comprehensive error handling (DomainException → JSON errors)
+
+- **Indicator Configuration** (`indicator_config.py`): Centralized indicator metadata
+  - `IndicatorMetadata`: Frozen dataclass with ID, name, category, description
+  - `IndicatorCategory`: Enum for categorizing indicators (DEMAND, GENERATION, PRICE, etc.)
+  - `IndicatorIDs`: Repository of 40+ commonly used indicators with typed access
+  - Helper methods: `get_generation_mix_sources()`, `get_renewable_sources()`, `get_international_exchanges()`
+  - Eliminates magic numbers throughout the codebase
+
+- **Tool Helpers** (`tool_helpers.py`): Reusable utility classes
+  - `DateTimeHelper`: Date/time operations (build ranges, validate formats)
+  - `ResponseFormatter`: Consistent JSON formatting (success, error, domain exceptions)
+  - `ToolExecutor`: Dependency injection container with async context management
+  - Eliminates code duplication across all tools
+
+- **Tool Services** (`tool_services.py`): Complex multi-indicator analysis
+  - `DataFetcher`: Multi-indicator data fetching service
+  - `GenerationMixService`: Generation breakdown and timeline analysis
+  - `RenewableAnalysisService`: Renewable energy calculations and percentages
+  - `GridStabilityService`: Synchronous vs variable renewable balance
+  - `InternationalExchangeService`: Cross-border flow analysis with net balance
+  - Encapsulates complex business logic for high-level tools
 
 ## Key Design Principles
 
@@ -173,9 +194,10 @@ This project implements **Clean Architecture** with **Domain-Driven Design (DDD)
 
 ## Testing Strategy
 
-### Unit Tests (`tests/unit/domain/`)
-**Test domain logic in isolation. NO mocking allowed.**
+### Unit Tests (`tests/unit/`)
+**Test domain logic and helpers in isolation. NO mocking allowed in domain tests.**
 
+**Domain Tests** (`tests/unit/domain/`):
 - `test_value_objects.py`: 26 tests
   - Validation (invalid IDs raise errors)
   - Conversions (to_api_params, from_iso_string)
@@ -187,6 +209,18 @@ This project implements **Clean Architecture** with **Domain-Driven Design (DDD)
   - Business methods (is_demand_indicator, is_generation_indicator)
   - Statistics (min, max, avg)
   - Geographic filtering
+
+**Interface Tests** (`tests/unit/interface/`):
+- `test_tool_helpers.py`: 29 tests
+  - DateTimeHelper: datetime range building, validation
+  - ResponseFormatter: success/error formatting, domain exceptions
+  - Focus on pure utility functions
+
+- `test_indicator_config.py`: 15 tests
+  - IndicatorMetadata creation and immutability
+  - IndicatorIDs: verify all constants exist
+  - Helper methods: generation mix, renewables, exchanges, synchronous sources
+  - Category verification
 
 ### Integration Tests (`tests/integration/infrastructure/`)
 **Test infrastructure with mocked HTTP (pytest-httpx).**
@@ -200,12 +234,12 @@ This project implements **Clean Architecture** with **Domain-Driven Design (DDD)
 ### E2E Tests (`tests/e2e/`)
 **Test complete workflows end-to-end.**
 
-- `test_mcp_server.py`: 8 tests
-  - All MCP tool invocations
-  - Error scenarios
+- `test_mcp_server.py`: 16 tests
+  - All 15 MCP tool invocations
+  - Error scenarios (invalid IDs, date ranges)
   - Real API tests (marked for manual execution)
 
-**Coverage**: 59 tests covering all layers.
+**Coverage**: 96 tests covering all layers with 90% overall code coverage.
 
 ## Configuration Management
 
@@ -227,10 +261,61 @@ RETRY_BACKOFF_FACTOR=0.5              # Optional
 
 ## Common Patterns
 
+### Adding a New MCP Tool (Refactored Pattern)
+**Follow this pattern to maintain DRY, KISS, and SOLID principles:**
+
+1. **Use existing indicator IDs** from `IndicatorIDs` in `indicator_config.py`, or add new ones if needed
+2. **Use helper classes** from `tool_helpers.py`:
+   ```python
+   from interface.tool_helpers import DateTimeHelper, ResponseFormatter, ToolExecutor
+
+   @mcp.tool()
+   async def my_new_tool(date: str, hour: str = "12") -> str:
+       try:
+           # Use DateTimeHelper for date operations
+           start_datetime, end_datetime = DateTimeHelper.build_datetime_range(date, hour)
+
+           # Use ToolExecutor for dependency injection
+           async with ToolExecutor() as executor:
+               use_case = executor.create_get_indicator_data_use_case()
+               # ... tool logic ...
+
+           # Use ResponseFormatter for consistent output
+           return ResponseFormatter.success(result)
+       except DomainException as e:
+           return ResponseFormatter.domain_exception(e)
+       except Exception as e:
+           return ResponseFormatter.unexpected_error(e, context="my tool context")
+   ```
+
+3. **For complex multi-indicator operations**, create a service in `tool_services.py`:
+   ```python
+   class MyAnalysisService:
+       def __init__(self, data_fetcher: DataFetcher):
+           self.data_fetcher = data_fetcher
+
+       async def analyze(self, start_date: str, end_date: str) -> dict[str, Any]:
+           # Use IndicatorIDs for constants
+           indicators = {
+               "demand": IndicatorIDs.REAL_DEMAND_PENINSULAR,
+               "generation": IndicatorIDs.NUCLEAR,
+           }
+           # Use DataFetcher to get data
+           data = await self.data_fetcher.fetch_multiple_indicators(
+               indicators, start_date, end_date
+           )
+           # Process and return
+           return {"result": data}
+   ```
+
+4. **Write tests**:
+   - Unit tests for services in `tests/unit/interface/`
+   - E2E test for the MCP tool in `tests/e2e/test_mcp_server.py`
+
 ### Adding a New Use Case
 1. Define DTO in `application/dtos/` (request + response)
 2. Create use case in `application/use_cases/` (depends on repository interface)
-3. Add MCP tool in `interface/mcp_server.py`
+3. Add MCP tool in `interface/mcp_server.py` using the refactored pattern above
 4. Write unit tests (domain logic) + e2e test (tool invocation)
 
 ### Adding a New Domain Concept
@@ -239,16 +324,41 @@ RETRY_BACKOFF_FACTOR=0.5              # Optional
 3. Write unit tests (validation, equality, methods)
 4. NO external dependencies allowed in domain
 
-### Error Handling Pattern
+### Adding New Indicator Constants
+Add to `indicator_config.py`:
 ```python
+class IndicatorIDs:
+    # Add new indicator
+    MY_NEW_INDICATOR = IndicatorMetadata(
+        id=12345,
+        name="My Indicator Name",
+        category=IndicatorCategory.GENERATION,
+        description="Detailed description"
+    )
+
+    # If needed, add to helper methods
+    @classmethod
+    def get_my_indicator_group(cls) -> dict[str, IndicatorMetadata]:
+        return {
+            "my_indicator": cls.MY_NEW_INDICATOR,
+            # ...
+        }
+```
+
+### Error Handling Pattern (Updated)
+**Always use `ResponseFormatter` for consistent error handling:**
+```python
+from interface.tool_helpers import ResponseFormatter
+from domain.exceptions import DomainException
+
 try:
     # Use case execution
     response = await use_case.execute(request)
-    return response.model_dump_json(indent=2)
+    return ResponseFormatter.success(response.model_dump())
 except DomainException as e:
-    return json.dumps({"error": str(e), "type": type(e).__name__}, indent=2)
+    return ResponseFormatter.domain_exception(e)
 except Exception as e:
-    return json.dumps({"error": f"Unexpected error: {str(e)}"}, indent=2)
+    return ResponseFormatter.unexpected_error(e, context="Operation context")
 ```
 
 ## Important Indicator IDs

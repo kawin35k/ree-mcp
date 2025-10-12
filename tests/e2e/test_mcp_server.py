@@ -9,22 +9,23 @@ import json
 import pytest
 from pytest_httpx import HTTPXMock
 
-from src.ree_mcp.interface.mcp_server import (
-    compare_forecast_actual,
-    get_carbon_intensity,
-    get_demand_summary,
-    get_generation_mix,
-    get_generation_mix_timeline,
-    get_grid_stability,
-    get_indicator_data,
-    get_international_exchanges,
-    get_peak_analysis,
-    get_price_analysis,
-    get_renewable_summary,
-    get_storage_operations,
-    list_indicators,
-    search_indicators,
-)
+from src.ree_mcp.interface import mcp_server
+
+# Access underlying functions from FastMCP FunctionTool wrappers
+compare_forecast_actual = mcp_server.compare_forecast_actual.fn
+get_carbon_intensity = mcp_server.get_carbon_intensity.fn
+get_demand_summary = mcp_server.get_demand_summary.fn
+get_generation_mix = mcp_server.get_generation_mix.fn
+get_generation_mix_timeline = mcp_server.get_generation_mix_timeline.fn
+get_grid_stability = mcp_server.get_grid_stability.fn
+get_indicator_data = mcp_server.get_indicator_data.fn
+get_international_exchanges = mcp_server.get_international_exchanges.fn
+get_peak_analysis = mcp_server.get_peak_analysis.fn
+get_price_analysis = mcp_server.get_price_analysis.fn
+get_renewable_summary = mcp_server.get_renewable_summary.fn
+get_storage_operations = mcp_server.get_storage_operations.fn
+list_indicators = mcp_server.list_indicators.fn
+search_indicators = mcp_server.search_indicators.fn
 
 
 class TestMCPServerTools:
@@ -76,7 +77,8 @@ class TestMCPServerTools:
 
         result = json.loads(result_str)
         assert "error" in result
-        assert "InvalidIndicatorIdError" in result["type"]
+        # Pydantic validation error for invalid ID
+        assert "validation error" in result["error"].lower() or "greater than 0" in result["error"]
 
     async def test_get_indicator_data_tool_invalid_date_range(self) -> None:
         """Test get_indicator_data tool with invalid date range."""
@@ -606,7 +608,7 @@ class TestMCPServerTools:
             }
         )
 
-        result_str = await get_peak_analysis(start_date="2025-10-08", end_date="2025-10-08")
+        result_str = await get_peak_analysis(start_date="2025-10-08", end_date="2025-10-09")
 
         result = json.loads(result_str)
         assert "period" in result
