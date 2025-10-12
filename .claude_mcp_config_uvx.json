@@ -2,7 +2,7 @@
   "mcpServers": {
     "ree-mcp": {
       "command": "uvx",
-      "args": ["--from", "git+https://github.com/YOUR_USERNAME/ree-mcp.git", "ree-mcp"],
+      "args": ["--from", "git+https://github.com/ESJavadex/ree-mcp.git", "ree-mcp"],
       "transport": "stdio",
       "env": {
         "REE_API_TOKEN": "YOUR_REE_API_TOKEN_HERE"
