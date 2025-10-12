@@ -143,7 +143,7 @@ This project implements **Clean Architecture** with **Domain-Driven Design (DDD)
 **Exposes domain functionality via MCP protocol.**
 
 - **MCP Server** (`mcp_server.py`): FastMCP integration
-  - **6 MCP Tools**: `get_indicator_data`, `list_indicators`, `search_indicators`, `get_demand_summary`, `get_generation_mix`
+  - **15 MCP Tools**: Low-level (`get_indicator_data`, `list_indicators`, `search_indicators`) + High-level convenience tools (demand, generation, renewables, carbon, pricing, storage, grid stability, forecasting)
   - **2 MCP Resources**: `ree://indicators`, `ree://indicators/{id}`
   - Dependency injection via `_get_repository()`
   - Comprehensive error handling (DomainException → JSON errors)
@@ -278,7 +278,9 @@ See `ree_docs.md` for complete indicator reference (gitignored).
 
 ## MCP Tools Reference
 
-### `get_indicator_data`
+### Core Tools (Low-Level API Access)
+
+#### `get_indicator_data`
 Fetch time-series data for any indicator.
 ```python
 await get_indicator_data(
@@ -289,29 +291,90 @@ await get_indicator_data(
 )
 ```
 
-### `list_indicators`
+#### `list_indicators`
 List all 1,967+ available indicators with pagination.
 ```python
 await list_indicators(limit=50, offset=0)
 ```
 
-### `search_indicators`
+#### `search_indicators`
 Search indicators by keyword.
 ```python
 await search_indicators("demanda", limit=20)
 ```
 
-### `get_demand_summary`
-Convenience tool for demand data.
+### Convenience Tools (High-Level Analysis)
+
+#### Demand & Generation
+
+**`get_demand_summary`**: Quick demand overview
 ```python
 await get_demand_summary("2025-10-08")
 ```
 
-### `get_generation_mix`
-Get generation breakdown by source.
+**`get_generation_mix`**: Generation breakdown at specific time
 ```python
 await get_generation_mix(date="2025-10-08", hour="12")
 ```
+
+**`get_generation_mix_timeline`**: Generation breakdown over time
+```python
+await get_generation_mix_timeline(date="2025-10-08", time_granularity="hour")
+```
+
+#### Renewable Energy & Sustainability
+
+**`get_renewable_summary`**: Renewable generation analysis
+```python
+await get_renewable_summary(date="2025-10-08", hour="12")
+```
+Returns: Total renewable MW, variable vs synchronous breakdown, percentage of demand
+
+**`get_carbon_intensity`**: CO₂ emissions per kWh
+```python
+await get_carbon_intensity(start_date="2025-10-08T00:00", end_date="2025-10-08T23:59", time_granularity="hour")
+```
+Returns: gCO₂/kWh time series + interpretation (excellent/good/moderate/poor)
+
+#### Grid Operations & Stability
+
+**`get_grid_stability`**: Synchronous vs variable renewable balance
+```python
+await get_grid_stability(date="2025-10-08", hour="12")
+```
+Returns: Inertia analysis, stability level assessment
+
+**`get_storage_operations`**: Pumped storage analysis
+```python
+await get_storage_operations(date="2025-10-08")
+```
+Returns: Pumping/turbining operations, efficiency metrics
+
+**`get_international_exchanges`**: Cross-border electricity flows
+```python
+await get_international_exchanges(date="2025-10-08", hour="12")
+```
+Returns: Import/export by country (Andorra, Morocco, Portugal, France)
+
+#### Market & Forecasting
+
+**`get_price_analysis`**: SPOT market price analysis
+```python
+await get_price_analysis(start_date="2025-10-08T00:00", end_date="2025-10-08T23:59")
+```
+Returns: Multi-country price comparison, statistics
+
+**`compare_forecast_actual`**: Demand forecast accuracy
+```python
+await compare_forecast_actual(date="2025-10-08")
+```
+Returns: MAE, RMSE, MAPE, bias analysis
+
+**`get_peak_analysis`**: Peak demand patterns
+```python
+await get_peak_analysis(start_date="2025-10-01", end_date="2025-10-31")
+```
+Returns: Daily max/min, load factors, efficiency metrics
 
 ## Code Quality Standards
 
