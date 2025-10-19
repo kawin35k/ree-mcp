@@ -96,9 +96,7 @@ class TestDateTimeRange:
 
     def test_from_iso_strings(self) -> None:
         """Test creating from ISO strings."""
-        date_range = DateTimeRange.from_iso_strings(
-            "2025-10-08T00:00", "2025-10-08T23:59"
-        )
+        date_range = DateTimeRange.from_iso_strings("2025-10-08T00:00", "2025-10-08T23:59")
 
         assert date_range.start.year == 2025
         assert date_range.start.month == 10
@@ -107,9 +105,7 @@ class TestDateTimeRange:
 
     def test_from_iso_strings_with_z(self) -> None:
         """Test creating from ISO strings with Z suffix."""
-        date_range = DateTimeRange.from_iso_strings(
-            "2025-10-08T00:00Z", "2025-10-08T23:59Z"
-        )
+        date_range = DateTimeRange.from_iso_strings("2025-10-08T00:00Z", "2025-10-08T23:59Z")
 
         assert date_range.start.year == 2025
 

@@ -128,9 +128,7 @@ class TestREEApiClient:
         httpx_mock.add_response(status_code=500)
         httpx_mock.add_response(status_code=500)
         # Third attempt: success
-        httpx_mock.add_response(
-            json={"indicator": {"id": 1293, "values": [{"value": 100.0}]}}
-        )
+        httpx_mock.add_response(json={"indicator": {"id": 1293, "values": [{"value": 100.0}]}})
 
         async with client:
             result = await client.get_indicator_data(
@@ -158,9 +156,7 @@ class TestREEApiClient:
                     end_date="2025-10-08T23:59",
                 )
 
-    async def test_list_indicators(
-        self, client: REEApiClient, httpx_mock: HTTPXMock
-    ) -> None:
+    async def test_list_indicators(self, client: REEApiClient, httpx_mock: HTTPXMock) -> None:
         """Test listing indicators."""
         mock_response = {
             "indicators": [

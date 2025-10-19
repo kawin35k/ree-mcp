@@ -151,7 +151,9 @@ class ResponseFormatter:
         Returns:
             JSON string with error details
         """
-        message = f"{context}: {str(exception)}" if context else f"Unexpected error: {str(exception)}"
+        message = (
+            f"{context}: {str(exception)}" if context else f"Unexpected error: {str(exception)}"
+        )
         return ResponseFormatter.error(message=message, indent=indent)
 
 

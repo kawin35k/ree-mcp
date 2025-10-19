@@ -23,9 +23,7 @@ class TestIndicatorMetadata:
 
     def test_indicator_metadata_immutable(self) -> None:
         """Test that indicator metadata is frozen (immutable)."""
-        metadata = IndicatorMetadata(
-            id=123, name="Test", category=IndicatorCategory.GENERATION
-        )
+        metadata = IndicatorMetadata(id=123, name="Test", category=IndicatorCategory.GENERATION)
 
         # Should not be able to modify attributes
         try:

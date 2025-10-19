@@ -159,9 +159,7 @@ class REEApiClient:
                 if "indicator" in data:
                     values = data["indicator"].get("values", [])
                     if not values:
-                        raise NoDataAvailableError(
-                            "No data available for the requested period"
-                        )
+                        raise NoDataAvailableError("No data available for the requested period")
 
                 return data
 
