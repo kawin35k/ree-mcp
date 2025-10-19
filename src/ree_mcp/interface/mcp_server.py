@@ -591,24 +591,129 @@ async def get_generation_mix_timeline(date: str, time_granularity: str = "hour")
 
 
 @mcp.tool()
-async def get_price_analysis(start_date: str, end_date: str) -> str:
+async def get_spain_hourly_prices(date: str) -> str:
+    """Get Spanish hourly electricity prices (SPOT market) for a specific day.
+
+    Returns the 24 hourly prices for the Spanish Peninsular market (OMIE/MIBEL).
+    This is the simplified version focused only on Spain, perfect for checking
+    daily electricity costs.
+
+    Args:
+        date: Date in YYYY-MM-DD format
+
+    Returns:
+        JSON string with hourly prices, min/max/average, and the cheapest/most
+        expensive hours.
+
+    Examples:
+        Get today's hourly prices:
+        >>> await get_spain_hourly_prices("2025-10-19")
+    """
+    try:
+        start_datetime = f"{date}T00:00"
+        end_datetime = f"{date}T23:59"
+
+        async with ToolExecutor() as executor:
+            use_case = executor.create_get_indicator_data_use_case()
+
+            # Get SPOT price data
+            request = GetIndicatorDataRequest(
+                indicator_id=IndicatorIDs.SPOT_MARKET_PRICE.id,
+                start_date=start_datetime,
+                end_date=end_datetime,
+                time_granularity="hour",
+            )
+            response = await use_case.execute(request)
+            price_data = response.model_dump()
+
+        values = price_data.get("values", [])
+
+        # Filter to only Spanish Peninsular market
+        spain_values = [v for v in values if v["geo_scope"] == "Península"]
+
+        if not spain_values:
+            return ResponseFormatter.success(
+                {
+                    "date": date,
+                    "error": "No price data available for Spanish Peninsular market",
+                }
+            )
+
+        # Build hourly price list
+        hourly_prices = []
+        for value_point in spain_values:
+            hourly_prices.append(
+                {
+                    "datetime": value_point["datetime"],
+                    "hour": value_point["datetime"][11:13],  # Extract HH from datetime
+                    "price_eur_per_mwh": round(value_point["value"], 2),
+                }
+            )
+
+        # Sort by datetime to ensure correct order
+        hourly_prices.sort(key=lambda x: x["datetime"])
+
+        # Calculate statistics
+        prices = [p["price_eur_per_mwh"] for p in hourly_prices]
+        min_price = min(prices)
+        max_price = max(prices)
+        avg_price = sum(prices) / len(prices)
+
+        # Find cheapest and most expensive hours
+        cheapest_hours = [p for p in hourly_prices if p["price_eur_per_mwh"] == min_price]
+        most_expensive_hours = [p for p in hourly_prices if p["price_eur_per_mwh"] == max_price]
+
+        result = {
+            "date": date,
+            "market": "Península (OMIE/MIBEL)",
+            "hourly_prices": hourly_prices,
+            "statistics": {
+                "min_price_eur_per_mwh": round(min_price, 2),
+                "max_price_eur_per_mwh": round(max_price, 2),
+                "avg_price_eur_per_mwh": round(avg_price, 2),
+                "total_hours": len(hourly_prices),
+            },
+            "cheapest_hours": [
+                {"hour": h["hour"], "price": h["price_eur_per_mwh"]} for h in cheapest_hours
+            ],
+            "most_expensive_hours": [
+                {"hour": h["hour"], "price": h["price_eur_per_mwh"]}
+                for h in most_expensive_hours
+            ],
+            "unit": "€/MWh",
+        }
+
+        return ResponseFormatter.success(result)
+
+    except Exception as e:
+        return ResponseFormatter.unexpected_error(e, context="Error getting Spanish hourly prices")
+
+
+@mcp.tool()
+async def get_price_analysis(
+    start_date: str, end_date: str, geo_filter: str | None = None
+) -> str:
     """Get electricity price analysis over time.
 
     Analyzes SPOT market prices with statistics and multi-country comparison.
+    Note: SPOT price indicator returns data for multiple European countries.
+    Use geo_filter to focus on a specific market.
 
     Args:
         start_date: Start datetime in ISO format (YYYY-MM-DDTHH:MM)
         end_date: End datetime in ISO format (YYYY-MM-DDTHH:MM)
+        geo_filter: Optional geographic filter (e.g., "Península", "Portugal", "France")
+                   If not specified, returns all countries
 
     Returns:
         JSON string with price data and analysis.
 
     Examples:
-        Get hourly prices for a day:
-        >>> await get_price_analysis("2025-10-08T00:00", "2025-10-08T23:59")
+        Get Spanish hourly prices for a day:
+        >>> await get_price_analysis("2025-10-08T00:00", "2025-10-08T23:59", "Península")
 
-        Get prices for a week:
-        >>> await get_price_analysis("2025-10-01T00:00", "2025-10-07T23:59")
+        Get all countries' prices for comparison:
+        >>> await get_price_analysis("2025-10-08T00:00", "2025-10-08T23:59")
     """
     try:
         async with ToolExecutor() as executor:
@@ -625,6 +730,10 @@ async def get_price_analysis(start_date: str, end_date: str) -> str:
             price_data = response.model_dump()
 
         values = price_data.get("values", [])
+
+        # Filter by geography if requested
+        if geo_filter:
+            values = [v for v in values if v["geo_scope"] == geo_filter]
 
         # Group by country
         countries: dict[str, list[dict[str, Any]]] = {}

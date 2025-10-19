@@ -26,6 +26,7 @@ get_peak_analysis = mcp_server.get_peak_analysis.fn
 get_price_analysis = mcp_server.get_price_analysis.fn
 get_pvpc_rate = mcp_server.get_pvpc_rate.fn
 get_renewable_summary = mcp_server.get_renewable_summary.fn
+get_spain_hourly_prices = mcp_server.get_spain_hourly_prices.fn
 get_storage_operations = mcp_server.get_storage_operations.fn
 list_indicators = mcp_server.list_indicators.fn
 search_indicators = mcp_server.search_indicators.fn
@@ -474,6 +475,53 @@ class TestMCPServerTools:
         assert "period" in result
         assert "timeline" in result
         assert len(result["timeline"]) > 0
+
+    async def test_get_spain_hourly_prices_tool(self, httpx_mock: HTTPXMock) -> None:
+        """Test get_spain_hourly_prices tool."""
+        httpx_mock.add_response(
+            json={
+                "indicator": {
+                    "id": 600,
+                    "name": "SPOT Price",
+                    "short_name": "SPOT",
+                    "magnitud": [{"name": "Precio"}],
+                    "tiempo": [{"name": "Hora"}],
+                    "geos": [{"geo_name": "Península"}],
+                    "values": [
+                        {
+                            "value": 50.25,
+                            "datetime": "2025-10-08T00:00:00.000+02:00",
+                            "datetime_utc": "2025-10-07T22:00:00Z",
+                            "geo_name": "Península",
+                        },
+                        {
+                            "value": 45.00,
+                            "datetime": "2025-10-08T01:00:00.000+02:00",
+                            "datetime_utc": "2025-10-07T23:00:00Z",
+                            "geo_name": "Península",
+                        },
+                        {
+                            "value": 120.50,
+                            "datetime": "2025-10-08T20:00:00.000+02:00",
+                            "datetime_utc": "2025-10-08T18:00:00Z",
+                            "geo_name": "Península",
+                        },
+                    ],
+                }
+            }
+        )
+
+        result_str = await get_spain_hourly_prices(date="2025-10-08")
+
+        result = json.loads(result_str)
+        assert result["date"] == "2025-10-08"
+        assert result["market"] == "Península (OMIE/MIBEL)"
+        assert "hourly_prices" in result
+        assert "statistics" in result
+        assert result["statistics"]["min_price_eur_per_mwh"] == 45.0
+        assert result["statistics"]["max_price_eur_per_mwh"] == 120.5
+        assert "cheapest_hours" in result
+        assert "most_expensive_hours" in result
 
     async def test_get_price_analysis_tool(self, httpx_mock: HTTPXMock) -> None:
         """Test get_price_analysis tool."""

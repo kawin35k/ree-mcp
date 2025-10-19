@@ -468,11 +468,23 @@ Returns: Import/export by country (Andorra, Morocco, Portugal, France)
 
 #### Market & Forecasting
 
-**`get_price_analysis`**: SPOT market price analysis
+**`get_spain_hourly_prices`**: Spanish hourly electricity prices (simplified)
 ```python
+await get_spain_hourly_prices(date="2025-10-19")
+```
+Returns: 24 hourly prices for Spanish Peninsular market (OMIE/MIBEL), with statistics and cheapest/most expensive hours.
+**Use this tool for simple daily Spanish price lookups.**
+
+**`get_price_analysis`**: SPOT market price analysis (multi-country)
+```python
+# Spanish prices only (recommended)
+await get_price_analysis(start_date="2025-10-08T00:00", end_date="2025-10-08T23:59", geo_filter="Península")
+
+# All European countries comparison
 await get_price_analysis(start_date="2025-10-08T00:00", end_date="2025-10-08T23:59")
 ```
-Returns: Multi-country price comparison, statistics
+Returns: Multi-country price comparison, statistics.
+**Important:** Indicator 600 (SPOT_MARKET_PRICE) returns data for multiple European countries (Spain, Portugal, France, Belgium, Netherlands, Germany). Use `geo_filter="Península"` to focus on Spanish market only.
 
 **`compare_forecast_actual`**: Demand forecast accuracy
 ```python

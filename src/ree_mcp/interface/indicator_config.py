@@ -156,7 +156,10 @@ class IndicatorIDs:
         id=600,
         name="SPOT Market Price",
         category=IndicatorCategory.PRICE,
-        description="Daily SPOT market electricity price (€/MWh)",
+        description="Daily SPOT market electricity price (€/MWh). "
+        "NOTE: Returns data for multiple European countries "
+        "(Spain/Península, Portugal, France, Belgium, Netherlands, Germany). "
+        "Filter by geo_scope='Península' for Spanish market only.",
     )
 
     PVPC_RATE = IndicatorMetadata(
