@@ -12,8 +12,10 @@ from pytest_httpx import HTTPXMock
 from src.ree_mcp.interface import mcp_server
 
 # Access underlying functions from FastMCP FunctionTool wrappers
+analyze_demand_volatility = mcp_server.analyze_demand_volatility.fn
 compare_forecast_actual = mcp_server.compare_forecast_actual.fn
 get_carbon_intensity = mcp_server.get_carbon_intensity.fn
+get_daily_demand_statistics = mcp_server.get_daily_demand_statistics.fn
 get_demand_summary = mcp_server.get_demand_summary.fn
 get_generation_mix = mcp_server.get_generation_mix.fn
 get_generation_mix_timeline = mcp_server.get_generation_mix_timeline.fn
@@ -22,6 +24,7 @@ get_indicator_data = mcp_server.get_indicator_data.fn
 get_international_exchanges = mcp_server.get_international_exchanges.fn
 get_peak_analysis = mcp_server.get_peak_analysis.fn
 get_price_analysis = mcp_server.get_price_analysis.fn
+get_pvpc_rate = mcp_server.get_pvpc_rate.fn
 get_renewable_summary = mcp_server.get_renewable_summary.fn
 get_storage_operations = mcp_server.get_storage_operations.fn
 list_indicators = mcp_server.list_indicators.fn
@@ -614,6 +617,206 @@ class TestMCPServerTools:
         assert "period" in result
         assert "daily_analysis" in result
         assert "period_statistics" in result
+
+    async def test_get_pvpc_rate_tool(self, httpx_mock: HTTPXMock) -> None:
+        """Test get_pvpc_rate tool."""
+        mock_response = {
+            "indicator": {
+                "id": 1013,
+                "name": "PVPC Rate",
+                "short_name": "PVPC",
+                "magnitud": [{"name": "Precio"}],
+                "tiempo": [{"name": "Hora"}],
+                "geos": [{"geo_name": "España"}],
+                "values": [
+                    {
+                        "value": 85.50,
+                        "datetime": "2025-10-08T12:00:00.000+02:00",
+                        "datetime_utc": "2025-10-08T10:00:00Z",
+                        "geo_name": "España",
+                    }
+                ],
+            }
+        }
+
+        httpx_mock.add_response(json=mock_response)
+
+        result_str = await get_pvpc_rate(date="2025-10-08", hour="12")
+
+        result = json.loads(result_str)
+        assert "pvpc_rate" in result
+        assert "value_eur_mwh" in result["pvpc_rate"]
+        assert result["pvpc_rate"]["value_eur_mwh"] == 85.50
+        assert "note" in result
+
+    async def test_get_daily_demand_statistics_tool(self, httpx_mock: HTTPXMock) -> None:
+        """Test get_daily_demand_statistics tool."""
+        # Mock max daily demand
+        httpx_mock.add_response(
+            json={
+                "indicator": {
+                    "id": 624,
+                    "name": "Max Demand",
+                    "short_name": "Max",
+                    "magnitud": [{"name": "Potencia"}],
+                    "tiempo": [{"name": "Día"}],
+                    "geos": [{"geo_name": "Península"}],
+                    "values": [
+                        {
+                            "value": 35000.0,
+                            "datetime": "2025-10-08T00:00:00.000+02:00",
+                            "datetime_utc": "2025-10-07T22:00:00Z",
+                            "geo_name": "Península",
+                        },
+                        {
+                            "value": 36000.0,
+                            "datetime": "2025-10-09T00:00:00.000+02:00",
+                            "datetime_utc": "2025-10-08T22:00:00Z",
+                            "geo_name": "Península",
+                        },
+                    ],
+                }
+            }
+        )
+        # Mock min daily demand
+        httpx_mock.add_response(
+            json={
+                "indicator": {
+                    "id": 625,
+                    "name": "Min Demand",
+                    "short_name": "Min",
+                    "magnitud": [{"name": "Potencia"}],
+                    "tiempo": [{"name": "Día"}],
+                    "geos": [{"geo_name": "Península"}],
+                    "values": [
+                        {
+                            "value": 25000.0,
+                            "datetime": "2025-10-08T00:00:00.000+02:00",
+                            "datetime_utc": "2025-10-07T22:00:00Z",
+                            "geo_name": "Península",
+                        },
+                        {
+                            "value": 26000.0,
+                            "datetime": "2025-10-09T00:00:00.000+02:00",
+                            "datetime_utc": "2025-10-08T22:00:00Z",
+                            "geo_name": "Península",
+                        },
+                    ],
+                }
+            }
+        )
+        # Mock sum generation
+        httpx_mock.add_response(
+            json={
+                "indicator": {
+                    "id": 10004,
+                    "name": "Sum Generation",
+                    "short_name": "Sum",
+                    "magnitud": [{"name": "Potencia"}],
+                    "tiempo": [{"name": "Día"}],
+                    "geos": [{"geo_name": "Península"}],
+                    "values": [
+                        {
+                            "value": 30000.0,
+                            "datetime": "2025-10-08T00:00:00.000+02:00",
+                            "datetime_utc": "2025-10-07T22:00:00Z",
+                            "geo_name": "Península",
+                        },
+                        {
+                            "value": 31000.0,
+                            "datetime": "2025-10-09T00:00:00.000+02:00",
+                            "datetime_utc": "2025-10-08T22:00:00Z",
+                            "geo_name": "Península",
+                        },
+                    ],
+                }
+            }
+        )
+
+        result_str = await get_daily_demand_statistics(
+            start_date="2025-10-08", end_date="2025-10-09"
+        )
+
+        result = json.loads(result_str)
+        assert "period" in result
+        assert "daily_statistics" in result
+        assert "summary" in result
+        assert len(result["daily_statistics"]) == 2
+        assert "load_factor" in result["daily_statistics"][0]
+        assert "daily_swing_mw" in result["daily_statistics"][0]
+
+    async def test_analyze_demand_volatility_tool(self, httpx_mock: HTTPXMock) -> None:
+        """Test analyze_demand_volatility tool."""
+        # Mock max daily demand
+        httpx_mock.add_response(
+            json={
+                "indicator": {
+                    "id": 624,
+                    "name": "Max Demand",
+                    "short_name": "Max",
+                    "magnitud": [{"name": "Potencia"}],
+                    "tiempo": [{"name": "Día"}],
+                    "geos": [{"geo_name": "Península"}],
+                    "values": [
+                        {
+                            "value": 35000.0,
+                            "datetime": "2025-10-08T00:00:00.000+02:00",
+                            "datetime_utc": "2025-10-07T22:00:00Z",
+                            "geo_name": "Península",
+                        },
+                        {
+                            "value": 36000.0,
+                            "datetime": "2025-10-09T00:00:00.000+02:00",
+                            "datetime_utc": "2025-10-08T22:00:00Z",
+                            "geo_name": "Península",
+                        },
+                    ],
+                }
+            }
+        )
+        # Mock min daily demand
+        httpx_mock.add_response(
+            json={
+                "indicator": {
+                    "id": 625,
+                    "name": "Min Demand",
+                    "short_name": "Min",
+                    "magnitud": [{"name": "Potencia"}],
+                    "tiempo": [{"name": "Día"}],
+                    "geos": [{"geo_name": "Península"}],
+                    "values": [
+                        {
+                            "value": 25000.0,
+                            "datetime": "2025-10-08T00:00:00.000+02:00",
+                            "datetime_utc": "2025-10-07T22:00:00Z",
+                            "geo_name": "Península",
+                        },
+                        {
+                            "value": 26000.0,
+                            "datetime": "2025-10-09T00:00:00.000+02:00",
+                            "datetime_utc": "2025-10-08T22:00:00Z",
+                            "geo_name": "Península",
+                        },
+                    ],
+                }
+            }
+        )
+
+        result_str = await analyze_demand_volatility(start_date="2025-10-08", end_date="2025-10-09")
+
+        result = json.loads(result_str)
+        assert "period" in result
+        assert "daily_volatility" in result
+        assert "analysis" in result
+        assert len(result["daily_volatility"]) == 2
+        # Check volatility metrics
+        assert "volatility_level" in result["daily_volatility"][0]
+        assert "swing_percentage" in result["daily_volatility"][0]
+        assert "load_factor_pct" in result["daily_volatility"][0]
+        # Check analysis metrics
+        assert "average_daily_swing_mw" in result["analysis"]
+        assert "volatility_distribution" in result["analysis"]
+        assert "stability_assessment" in result["analysis"]
 
 
 @pytest.mark.integration

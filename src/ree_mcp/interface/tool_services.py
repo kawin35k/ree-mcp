@@ -130,9 +130,7 @@ class GenerationMixService:
         """
         self.data_fetcher = data_fetcher
 
-    async def get_generation_mix(
-        self, start_date: str, end_date: str
-    ) -> dict[str, Any]:
+    async def get_generation_mix(self, start_date: str, end_date: str) -> dict[str, Any]:
         """Get generation mix for a specific time.
 
         Args:
@@ -242,9 +240,7 @@ class RenewableAnalysisService:
         """
         self.data_fetcher = data_fetcher
 
-    async def get_renewable_summary(
-        self, start_date: str, end_date: str
-    ) -> dict[str, Any]:
+    async def get_renewable_summary(self, start_date: str, end_date: str) -> dict[str, Any]:
         """Get renewable generation summary.
 
         Args:
@@ -305,9 +301,7 @@ class RenewableAnalysisService:
             result["summary"] = {
                 "total_renewable_mw": round(total_renewable_mw, 2),
                 "variable_renewable_mw": round(variable_renewable_mw, 2),
-                "synchronous_renewable_mw": round(
-                    total_renewable_mw - variable_renewable_mw, 2
-                ),
+                "synchronous_renewable_mw": round(total_renewable_mw - variable_renewable_mw, 2),
                 "total_demand_mw": round(demand_mw, 2),
                 "renewable_percentage": round(renewable_pct, 2),
                 "variable_renewable_percentage": round(variable_pct, 2),
@@ -333,9 +327,7 @@ class GridStabilityService:
         """
         self.data_fetcher = data_fetcher
 
-    async def get_grid_stability(
-        self, start_date: str, end_date: str
-    ) -> dict[str, Any]:
+    async def get_grid_stability(self, start_date: str, end_date: str) -> dict[str, Any]:
         """Get grid stability metrics.
 
         Args:
@@ -449,9 +441,7 @@ class InternationalExchangeService:
         """
         self.data_fetcher = data_fetcher
 
-    async def get_international_exchanges(
-        self, start_date: str, end_date: str
-    ) -> dict[str, Any]:
+    async def get_international_exchanges(self, start_date: str, end_date: str) -> dict[str, Any]:
         """Get international electricity exchanges.
 
         Args:
@@ -498,5 +488,209 @@ class InternationalExchangeService:
         result["totals"]["net_balance_mw"] = (
             result["totals"]["total_imports_mw"] - result["totals"]["total_exports_mw"]
         )
+
+        return result
+
+
+class DemandAnalysisService:
+    """Service for demand pattern analysis.
+
+    Handles daily demand statistics and volatility calculations.
+    """
+
+    def __init__(self, data_fetcher: DataFetcher):
+        """Initialize the demand analysis service.
+
+        Args:
+            data_fetcher: Data fetcher instance
+        """
+        self.data_fetcher = data_fetcher
+
+    async def get_daily_demand_statistics(self, start_date: str, end_date: str) -> dict[str, Any]:
+        """Get daily demand statistics.
+
+        Args:
+            start_date: Start date in YYYY-MM-DD format
+            end_date: End date in YYYY-MM-DD format
+
+        Returns:
+            Daily demand statistics with max, min, and sum of generation
+        """
+        # Fetch all three demand indicators
+        indicators = {
+            "max_daily": IndicatorIDs.MAX_DAILY_DEMAND,
+            "min_daily": IndicatorIDs.MIN_DAILY_DEMAND,
+            "sum_generation": IndicatorIDs.REAL_DEMAND_SUM_GENERATION,
+        }
+
+        raw_data = await self.data_fetcher.fetch_multiple_indicators(
+            indicators, start_date, end_date, "day"
+        )
+
+        result: dict[str, Any] = {
+            "period": {"start": start_date, "end": end_date},
+            "daily_statistics": [],
+        }
+
+        # Extract values by date
+        max_values = raw_data.get("max_daily", {}).get("values", [])
+        min_values = raw_data.get("min_daily", {}).get("values", [])
+        sum_values = raw_data.get("sum_generation", {}).get("values", [])
+
+        # Combine data by date
+        for i, max_point in enumerate(max_values):
+            date = max_point["datetime"][:10]  # Extract YYYY-MM-DD
+            max_mw = max_point["value"]
+
+            min_mw = min_values[i]["value"] if i < len(min_values) else None
+            sum_mw = sum_values[i]["value"] if i < len(sum_values) else None
+
+            daily_stat: dict[str, Any] = {
+                "date": date,
+                "max_demand_mw": max_mw,
+                "min_demand_mw": min_mw,
+                "sum_generation_mw": sum_mw,
+            }
+
+            # Calculate load factor if we have both max and min
+            if min_mw is not None and max_mw > 0:
+                daily_stat["load_factor"] = round((min_mw / max_mw) * 100, 2)
+                daily_stat["daily_swing_mw"] = round(max_mw - min_mw, 2)
+            else:
+                daily_stat["load_factor"] = None
+                daily_stat["daily_swing_mw"] = None
+
+            result["daily_statistics"].append(daily_stat)
+
+        # Calculate overall statistics
+        if result["daily_statistics"]:
+            max_values_list = [s["max_demand_mw"] for s in result["daily_statistics"]]
+            min_values_list = [
+                s["min_demand_mw"]
+                for s in result["daily_statistics"]
+                if s["min_demand_mw"] is not None
+            ]
+            load_factors = [
+                s["load_factor"] for s in result["daily_statistics"] if s["load_factor"] is not None
+            ]
+
+            result["summary"] = {
+                "peak_demand_mw": round(max(max_values_list), 2),
+                "lowest_demand_mw": round(min(min_values_list), 2) if min_values_list else None,
+                "average_max_demand_mw": round(sum(max_values_list) / len(max_values_list), 2),
+                "average_load_factor_pct": (
+                    round(sum(load_factors) / len(load_factors), 2) if load_factors else None
+                ),
+                "days_analyzed": len(result["daily_statistics"]),
+            }
+
+        return result
+
+    async def analyze_demand_volatility(self, start_date: str, end_date: str) -> dict[str, Any]:
+        """Analyze demand volatility patterns.
+
+        Args:
+            start_date: Start date in YYYY-MM-DD format
+            end_date: End date in YYYY-MM-DD format
+
+        Returns:
+            Volatility analysis with swings and stability metrics
+        """
+        # Fetch max and min daily demand
+        indicators = {
+            "max_daily": IndicatorIDs.MAX_DAILY_DEMAND,
+            "min_daily": IndicatorIDs.MIN_DAILY_DEMAND,
+        }
+
+        raw_data = await self.data_fetcher.fetch_multiple_indicators(
+            indicators, start_date, end_date, "day"
+        )
+
+        result: dict[str, Any] = {
+            "period": {"start": start_date, "end": end_date},
+            "daily_volatility": [],
+            "analysis": {},
+        }
+
+        max_values = raw_data.get("max_daily", {}).get("values", [])
+        min_values = raw_data.get("min_daily", {}).get("values", [])
+
+        daily_swings = []
+        load_factors = []
+
+        # Calculate daily volatility
+        for i, max_point in enumerate(max_values):
+            if i >= len(min_values):
+                break
+
+            date = max_point["datetime"][:10]
+            max_mw = max_point["value"]
+            min_mw = min_values[i]["value"]
+
+            swing_mw = max_mw - min_mw
+            swing_pct = (swing_mw / max_mw) * 100 if max_mw > 0 else 0
+            load_factor = (min_mw / max_mw) * 100 if max_mw > 0 else 0
+
+            volatility_data = {
+                "date": date,
+                "max_demand_mw": round(max_mw, 2),
+                "min_demand_mw": round(min_mw, 2),
+                "daily_swing_mw": round(swing_mw, 2),
+                "swing_percentage": round(swing_pct, 2),
+                "load_factor_pct": round(load_factor, 2),
+            }
+
+            # Volatility classification
+            if swing_pct < 20:
+                volatility_data["volatility_level"] = "low"
+            elif swing_pct < 40:
+                volatility_data["volatility_level"] = "moderate"
+            elif swing_pct < 60:
+                volatility_data["volatility_level"] = "high"
+            else:
+                volatility_data["volatility_level"] = "very_high"
+
+            result["daily_volatility"].append(volatility_data)
+            daily_swings.append(swing_mw)
+            load_factors.append(load_factor)
+
+        # Overall analysis
+        if daily_swings:
+            avg_swing = sum(daily_swings) / len(daily_swings)
+            max_swing = max(daily_swings)
+            min_swing = min(daily_swings)
+            avg_load_factor = sum(load_factors) / len(load_factors)
+
+            # Count days by volatility level
+            volatility_counts = {"low": 0, "moderate": 0, "high": 0, "very_high": 0}
+            for day_data in result["daily_volatility"]:
+                level = day_data["volatility_level"]
+                volatility_counts[level] += 1
+
+            result["analysis"] = {
+                "average_daily_swing_mw": round(avg_swing, 2),
+                "max_daily_swing_mw": round(max_swing, 2),
+                "min_daily_swing_mw": round(min_swing, 2),
+                "average_load_factor_pct": round(avg_load_factor, 2),
+                "volatility_distribution": volatility_counts,
+                "stability_assessment": (
+                    "excellent"
+                    if avg_load_factor >= 80
+                    else "good"
+                    if avg_load_factor >= 70
+                    else "moderate"
+                    if avg_load_factor >= 60
+                    else "concerning"
+                ),
+                "interpretation": {
+                    "load_factor": "Higher load factor (closer to 100%) indicates more stable demand",
+                    "volatility_levels": {
+                        "low": "<20% swing",
+                        "moderate": "20-40% swing",
+                        "high": "40-60% swing",
+                        "very_high": ">60% swing",
+                    },
+                },
+            }
 
         return result

@@ -18,6 +18,7 @@ from .indicator_config import IndicatorIDs
 from .tool_helpers import DateTimeHelper, ResponseFormatter, ToolExecutor
 from .tool_services import (
     DataFetcher,
+    DemandAnalysisService,
     GenerationMixService,
     GridStabilityService,
     InternationalExchangeService,
@@ -367,9 +368,7 @@ async def get_carbon_intensity(
         for co2_val, demand_val in zip(co2_values, demand_values, strict=False):
             if demand_val["value"] > 0:
                 # Convert tCO2 to gCO2, MW to MWh (for hourly data they're equivalent)
-                intensity_g_per_kwh = (co2_val["value"] * 1_000_000) / (
-                    demand_val["value"] * 1_000
-                )
+                intensity_g_per_kwh = (co2_val["value"] * 1_000_000) / (demand_val["value"] * 1_000)
                 intensity_values.append(
                     {
                         "datetime": co2_val["datetime"],
@@ -485,12 +484,9 @@ async def compare_forecast_actual(date: str) -> str:
             mae = sum(absolute_errors) / len(absolute_errors)
             rmse = (sum(squared_errors) / len(squared_errors)) ** 0.5
             mean_error = sum(errors) / len(errors)
-            mape = (
-                sum(
-                    abs(e / a["value"]) * 100 for e, a in zip(errors, actual_values, strict=False)
-                )
-                / len(errors)
-            )
+            mape = sum(
+                abs(e / a["value"]) * 100 for e, a in zip(errors, actual_values, strict=False)
+            ) / len(errors)
 
             accuracy_metrics = {
                 "mean_absolute_error_mw": round(mae, 2),
@@ -500,7 +496,9 @@ async def compare_forecast_actual(date: str) -> str:
                 "bias": (
                     "overforecast"
                     if mean_error > 0
-                    else "underforecast" if mean_error < 0 else "unbiased"
+                    else "underforecast"
+                    if mean_error < 0
+                    else "unbiased"
                 ),
             }
 
@@ -729,7 +727,11 @@ async def get_storage_operations(date: str) -> str:
                     "turbining_mw": turb_mw,
                     "net_storage_mw": round(net_mw, 2),
                     "operation": (
-                        "storing" if pump_mw > turb_mw else "releasing" if turb_mw > pump_mw else "idle"
+                        "storing"
+                        if pump_mw > turb_mw
+                        else "releasing"
+                        if turb_mw > pump_mw
+                        else "idle"
                     ),
                 }
             )
@@ -750,9 +752,7 @@ async def get_storage_operations(date: str) -> str:
                 "total_energy_released_mwh": round(total_turbining_mwh, 2),
                 "net_energy_balance_mwh": round(total_turbining_mwh - total_pumping_mwh, 2),
                 "efficiency_percentage": round(efficiency_pct, 2),
-                "efficiency_assessment": (
-                    "normal" if 70 <= efficiency_pct <= 85 else "check_data"
-                ),
+                "efficiency_assessment": ("normal" if 70 <= efficiency_pct <= 85 else "check_data"),
             },
         }
 
@@ -843,9 +843,7 @@ async def get_peak_analysis(start_date: str, end_date: str) -> str:
                 "highest_peak_mw": max(peak_demands),
                 "lowest_peak_mw": min(peak_demands),
                 "average_peak_mw": round(sum(peak_demands) / len(peak_demands), 2),
-                "average_load_factor_percentage": round(
-                    sum(load_factors) / len(load_factors), 2
-                ),
+                "average_load_factor_percentage": round(sum(load_factors) / len(load_factors), 2),
                 "interpretation": {
                     "high_load_factor": "> 70% (efficient, stable demand)",
                     "medium_load_factor": "50-70% (moderate variability)",
@@ -863,6 +861,145 @@ async def get_peak_analysis(start_date: str, end_date: str) -> str:
 
     except Exception as e:
         return ResponseFormatter.unexpected_error(e, context="Error analyzing peaks")
+
+
+@mcp.tool()
+async def get_pvpc_rate(date: str, hour: str = "12") -> str:
+    """Get the PVPC regulated electricity rate at a specific time.
+
+    Returns the PVPC (Precio Voluntario para el Pequeño Consumidor) rate,
+    which is the regulated retail electricity price for consumers in Spain.
+
+    Args:
+        date: Date in YYYY-MM-DD format
+        hour: Hour in HH format (00-23, default: 12)
+
+    Returns:
+        JSON string with PVPC rate data.
+
+    Examples:
+        Get PVPC rate at noon on Oct 8:
+        >>> await get_pvpc_rate("2025-10-08", "12")
+
+        Get PVPC rate at midnight:
+        >>> await get_pvpc_rate("2025-10-08", "00")
+    """
+    try:
+        start_datetime, end_datetime = DateTimeHelper.build_datetime_range(date, hour)
+
+        async with ToolExecutor() as executor:
+            use_case = executor.create_get_indicator_data_use_case()
+            request = GetIndicatorDataRequest(
+                indicator_id=IndicatorIDs.PVPC_RATE.id,
+                start_date=start_datetime,
+                end_date=end_datetime,
+                time_granularity="hour",
+            )
+            response = await use_case.execute(request)
+            pvpc_data = response.model_dump()
+
+        # Extract value
+        values = pvpc_data.get("values", [])
+        if values:
+            result = {
+                "datetime": start_datetime,
+                "pvpc_rate": {
+                    "value_eur_mwh": values[0]["value"],
+                    "unit": pvpc_data["indicator"]["unit"],
+                    "description": "PVPC regulated retail electricity rate for consumers",
+                },
+                "note": (
+                    "PVPC (Precio Voluntario para el Pequeño Consumidor) is the "
+                    "regulated electricity price in Spain"
+                ),
+            }
+        else:
+            result = {
+                "datetime": start_datetime,
+                "error": "No PVPC rate data available for this period",
+                "note": "PVPC data may not be available for all time periods",
+            }
+
+        return ResponseFormatter.success(result)
+
+    except DomainException as e:
+        return ResponseFormatter.domain_exception(e)
+    except Exception as e:
+        return ResponseFormatter.unexpected_error(e, context="Error getting PVPC rate")
+
+
+@mcp.tool()
+async def get_daily_demand_statistics(start_date: str, end_date: str) -> str:
+    """Get daily demand statistics for a period.
+
+    Provides comprehensive daily demand analysis including maximum, minimum,
+    and sum of generation values for each day in the specified period.
+
+    Args:
+        start_date: Start date in YYYY-MM-DD format
+        end_date: End date in YYYY-MM-DD format
+
+    Returns:
+        JSON string with daily statistics and overall summary.
+
+    Examples:
+        Get statistics for a week:
+        >>> await get_daily_demand_statistics("2025-10-01", "2025-10-07")
+
+        Get statistics for a month:
+        >>> await get_daily_demand_statistics("2025-10-01", "2025-10-31")
+    """
+    try:
+        async with ToolExecutor() as executor:
+            use_case = executor.create_get_indicator_data_use_case()
+            data_fetcher = DataFetcher(use_case)
+            service = DemandAnalysisService(data_fetcher)
+
+            result = await service.get_daily_demand_statistics(start_date, end_date)
+
+        return ResponseFormatter.success(result)
+
+    except DomainException as e:
+        return ResponseFormatter.domain_exception(e)
+    except Exception as e:
+        return ResponseFormatter.unexpected_error(e, context="Error getting demand statistics")
+
+
+@mcp.tool()
+async def analyze_demand_volatility(start_date: str, end_date: str) -> str:
+    """Analyze demand volatility patterns over a period.
+
+    Calculates daily demand swings, load factors, and volatility levels
+    to identify high-variability days and overall stability patterns.
+
+    Args:
+        start_date: Start date in YYYY-MM-DD format
+        end_date: End date in YYYY-MM-DD format
+
+    Returns:
+        JSON string with volatility analysis and stability assessment.
+
+    Examples:
+        Analyze volatility for a week:
+        >>> await analyze_demand_volatility("2025-10-01", "2025-10-07")
+
+        Analyze volatility for a month:
+        >>> await analyze_demand_volatility("2025-10-01", "2025-10-31")
+    """
+    try:
+        async with ToolExecutor() as executor:
+            use_case = executor.create_get_indicator_data_use_case()
+            data_fetcher = DataFetcher(use_case)
+            service = DemandAnalysisService(data_fetcher)
+
+            result = await service.analyze_demand_volatility(start_date, end_date)
+
+        return ResponseFormatter.success(result)
+
+    except DomainException as e:
+        return ResponseFormatter.domain_exception(e)
+    except Exception as e:
+        return ResponseFormatter.unexpected_error(e, context="Error analyzing demand volatility")
 
 
 # MCP Resources
